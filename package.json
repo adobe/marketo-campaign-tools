@@ -1,12 +1,13 @@
 {
-  "name": "Marketo Reporting Framework Toolkit",
+  "name": "marketo-reporting-framework-toolkit",
   "version": "0.0.1",
   "private": true,
   "main": "index.js",
   "scripts": {
     "build": "rollup -c",
     "dev": "rollup -c -w",
-    "start": "electron ."
+    "start": "electron .",
+    "dist": "yarn build && electron-builder"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^17.0.0",

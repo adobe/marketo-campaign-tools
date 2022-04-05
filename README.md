@@ -1,109 +1,56 @@
-*Psst — looking for a more complete solution? Check out [SvelteKit](https://kit.svelte.dev), the official framework for building web applications of all sizes, with a beautiful development experience and flexible filesystem-based routing.*
+# Adobe Marketo Campaign Assistant
 
-*Looking for a shareable component template instead? You can [use SvelteKit for that as well](https://kit.svelte.dev/docs#packaging) or the older [sveltejs/component-template](https://github.com/sveltejs/component-template)*
+This tool is design to assist and facilitate Marketo customers with the creation campaign URLs. In order to most effectively utilize this tool, Marketo customers will need to understand the following primary concepts: 
+
+  1. Campaigns
+  1. Dimensions
+
+## Campaigns
+
+A campaign is an organized and concerted effort to drive towards a particular goal. The key words being "organized," "concerted," and, "particular goal." The act of informing your customers about a new product (marketing) and facilitating a transaction (commerce) does not alone qualify as a campaign. We can make this a campaign by adding clarity in goal and operation: sell 200,000 units in North America of this new product within the first fiscal quarter of availabilty via our new product website.
+
+Once you've identified a campaign, it's time to break that down into the various components that will be needed in order to effectively track the overall efficacy of the campaigns tactics.
+
+## Dimensions
+
+Dimensions should help to categorize content in a manner that is exclusive to other dimensions. For instance, common dimensions in a campaign could include the following: 
+
+  - Region
+  - Channel (or Campaign Type)
+  - Season
+  - Affiliate ID
+
+While dimensions could have similar associated values (e.g. a numerical ID code for the various dimensions could result in several "1" values), the combination of the dimension and the value make that data uniquely different from other dimensional values, thus allowing for categorization and analysis. 
+
+If we take our example campaign, we might identify the following dimensions: 
+
+  - Region (North America)
+  - SKU (the specific product we're selling)
+  - Quarter (the fiscal quarter in-which the product is sold)
+  - Channel (website vs. in-store and partner-site purchases)
 
 ---
 
-# svelte app
+# Developer Documentation
 
-This is a project template for [Svelte](https://svelte.dev) apps. It lives at https://github.com/sveltejs/template.
+The following section is written for developers that will be contributing or utilizing this tool. It describes how to run, validate, and develop this tool. 
 
-To create a new project based on this template using [degit](https://github.com/Rich-Harris/degit):
+## Architecture
 
-```bash
-npx degit sveltejs/template svelte-app
-cd svelte-app
-```
+(Diagrams TBD)
 
-*Note that you will need to have [Node.js](https://nodejs.org) installed.*
+This application has been developed using the following tools and frameworks: 
 
+  - Electron
+  - SvelteJS
+  - NodeJS
 
-## Get started
+## Application Structure
 
-Install the dependencies...
+## Deployment
 
-```bash
-cd svelte-app
-npm install
-```
-
-...then start [Rollup](https://rollupjs.org):
+## Usage
 
 ```bash
-npm run dev
-```
-
-Navigate to [localhost:8080](http://localhost:8080). You should see your app running. Edit a component file in `src`, save it, and reload the page to see your changes.
-
-By default, the server will only respond to requests from localhost. To allow connections from other computers, edit the `sirv` commands in package.json to include the option `--host 0.0.0.0`.
-
-If you're using [Visual Studio Code](https://code.visualstudio.com/) we recommend installing the official extension [Svelte for VS Code](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode). If you are using other editors you may need to install a plugin in order to get syntax highlighting and intellisense.
-
-## Building and running in production mode
-
-To create an optimised version of the app:
-
-```bash
-npm run build
-```
-
-You can run the newly built app with `npm run start`. This uses [sirv](https://github.com/lukeed/sirv), which is included in your package.json's `dependencies` so that the app will work when you deploy to platforms like [Heroku](https://heroku.com).
-
-
-## Single-page app mode
-
-By default, sirv will only respond to requests that match files in `public`. This is to maximise compatibility with static fileservers, allowing you to deploy your app anywhere.
-
-If you're building a single-page app (SPA) with multiple routes, sirv needs to be able to respond to requests for *any* path. You can make it so by editing the `"start"` command in package.json:
-
-```js
-"start": "sirv public --single"
-```
-
-## Using TypeScript
-
-This template comes with a script to set up a TypeScript development environment, you can run it immediately after cloning the template with:
-
-```bash
-node scripts/setupTypeScript.js
-```
-
-Or remove the script via:
-
-```bash
-rm scripts/setupTypeScript.js
-```
-
-If you want to use `baseUrl` or `path` aliases within your `tsconfig`, you need to set up `@rollup/plugin-alias` to tell Rollup to resolve the aliases. For more info, see [this StackOverflow question](https://stackoverflow.com/questions/63427935/setup-tsconfig-path-in-svelte).
-
-## Deploying to the web
-
-### With [Vercel](https://vercel.com)
-
-Install `vercel` if you haven't already:
-
-```bash
-npm install -g vercel
-```
-
-Then, from within your project folder:
-
-```bash
-cd public
-vercel deploy --name my-project
-```
-
-### With [surge](https://surge.sh/)
-
-Install `surge` if you haven't already:
-
-```bash
-npm install -g surge
-```
-
-Then, from within your project folder:
-
-```bash
-npm run build
-surge public my-project.surge.sh
+yarn start
 ```
