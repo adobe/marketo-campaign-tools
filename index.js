@@ -4,6 +4,8 @@ const os = require('os');
 const fs = require('fs/promises');
 const { open, write, constants } = require('fs');
 
+let userConfigPath = path.join(os.homedir(),".marketo-toolkit");
+
 const createLocalConfig = (config) => {
     
     const { O_RDWR, O_CREAT } = constants;
@@ -27,10 +29,18 @@ const createLocalConfig = (config) => {
                         })
                     })
                     .catch(err => { console.log(err) })
-            }).catch(err => console.log(err))
+                    .finally(() => fh.close() );
+            })
+            .catch(err => console.log(err))
     } else {
         console.log(`Local configuration file method was called without a configuration`);
     }
+}
+
+const openUserConfig = () => {
+    const { O_RDONLY } = constants;
+
+    return fs.readFile(userConfigPath, 'utf-8');
 }
 
 const createWindow = () => {
@@ -40,8 +50,17 @@ const createWindow = () => {
         }
     });
 
-    // TODO: Check for existence of local user configuration for the application
-    // TODO: If local user config, check for use of provided Marketo configuration and auto-load on start-up
+    openUserConfig().then(contents => {
+        console.log(contents);
+        let conf = JSON.parse(contents);
+        fs.open(conf.configPath).then(fh => {
+            fh.readFile("utf-8")
+                .then(contents => {
+                    mainWindow.webContents.send('configuration-loaded', JSON.parse(contents));            
+                })
+        })
+    })
+
 
     ipcMain.on('set-file-upload', (e, fileName, path) => {
         
