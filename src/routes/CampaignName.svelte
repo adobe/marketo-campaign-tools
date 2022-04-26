@@ -19,6 +19,8 @@
 
 	let geos = window.electronAPI.getConfig()?.Geos;
 
+	let inputs = window.electronAPI.getConfig()?.Inputs;
+
 	// Add maps to name map
 	keyMappings.set("dataPointA", dpaMappings);
 
@@ -60,13 +62,20 @@
 	}
 </script>
 <main>
+	<!-- TODO: Only Date (id?), Details, and Type are required; make all other fields optional based on configuration -->
 	<Input label="Campaign ID" name="campaignID" placeholder="Campaign ID" on:input={handleChange} index={1} />
-	<Input label="Data Point A" name="dataPointA" placeholder="Enter Data Point A" on:input={handleChange} index={2} />
-	<Input label="Data Point B" name="dataPointB" placeholder="Eneter Data Point B" on:input={handleChange} index={3} />
-	<Select label="Geo" name="geo" placeholder="Enter GEO" on:input={handleChange} options={geos} index={4} />
 	<Input label="Campaign Details" name="campaignDetails" placeholder="Enter Campaign Details" on:input={handleChange} index={5} />
 	<Input label="Campaign Type" name="campaignType" placeholder="Enter Campaign Type" on:input={handleChange} index={6} />
 	
+	{#each inputs as input }
+		{#if input.type === "select"}
+			<Select label="{input.label}" name="{input.name}" placeholder="{input.placeholder}" on:input={handleChange} options={input.options} index={input.index} />
+		{:else}
+			<Input label="{input.label}" name="{input.name}" placeholder="{input.placeholder}" on:input={handleChange} index={input.index} />
+		{/if}
+	{/each}
+
+	<!-- This area is for output only  -->
 	<TextArea name="generatedUrl" text={url} />
 	<Counter label={"Number of characters:"} count={url === urlPlaceholder ? 0 : url.length} />
 </main>
