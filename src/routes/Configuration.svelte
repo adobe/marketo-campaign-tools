@@ -1,6 +1,7 @@
 <script>
 	import Channels from './configurations/Channels.svelte';
     import Dimensions from './configurations/Dimensions.svelte';
+    import Upload from './configurations/Upload.svelte';
 
     let selectedConfiguration = Dimensions;
 </script>
@@ -12,6 +13,9 @@
         </li>
         <li on:click={() => selectedConfiguration = Dimensions}>
             Dimensions
+        </li>
+        <li on:click={() => selectedConfiguration = Upload}>
+            Upload
         </li>
     </menu>
     <main>

@@ -46,6 +46,8 @@
 			let mappedValue = getMappedValue(valuePair);
 			url += `${mappedValue}_`;
 		})
+
+		url = url.replaceAll(/\s/g, '-');
 	}
 
 	const getMappedValue = (pair) => {
