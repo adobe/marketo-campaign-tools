@@ -23,6 +23,12 @@
     </main>
 </div>
 <style>
+    h1 {
+        position: fixed;
+        bottom: 1rem;
+        left: 1rem;
+    }
+
     .config-container {
         display: grid;
         grid-template-columns: 1fr 4fr;

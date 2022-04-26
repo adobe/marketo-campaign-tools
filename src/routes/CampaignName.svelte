@@ -2,6 +2,7 @@
 	import Input from '../form/Input.svelte';
 	import TextArea from '../form/Textarea.svelte';
 	import Counter from '../form/Counter.svelte';
+import Select from '../form/Select.svelte';
 	let url = "Enter data to start creating URL";
 
 	let urlComponents = new Map();
@@ -20,6 +21,14 @@
 	geoMappings.set("Latin America", "LATAM");
 	geoMappings.set("EMEA", "EMEA");
 	geoMappings.set("Asia Pacific", "APAC");
+
+	let geos = [
+		{label: "North America", value: "AMER"},
+		{label: "Global", value: "GBL"},
+		{label: "Latin America", value: "LATAM"},
+		{label: "EMEA", value: "EMEA"},
+		{label: "Asia Pacific", value: "APAC"}
+	]	
 
 	// Add maps to name map
 	keyMappings.set("dataPointA", dpaMappings);
@@ -59,7 +68,8 @@
 	<Input label="Campaign ID" name="campaignID" placeholder="Campaign ID" on:input={handleChange} index={1} />
 	<Input label="Data Point A" name="dataPointA" placeholder="Enter Data Point A" on:input={handleChange} index={2} />
 	<Input label="Data Point B" name="dataPointB" placeholder="Eneter Data Point B" on:input={handleChange} index={3} />
-	<Input label="Geo" name="geo" placeholder="Enter GEO" on:input={handleChange} index={4} />
+	<!-- <Input label="Geo" name="geo" placeholder="Enter GEO" on:input={handleChange} index={4} /> -->
+	<Select label="Geo" name="geo" placeholder="Enter GEO" on:input={handleChange} options={geos} index={4} />
 	<Input label="Campaign Details" name="campaignDetails" placeholder="Enter Campaign Details" on:input={handleChange} index={5} />
 	<Input label="Campaign Type" name="campaignType" placeholder="Enter Campaign Type" on:input={handleChange} index={6} />
 	
