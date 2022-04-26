@@ -2,7 +2,8 @@
 	import Input from '../form/Input.svelte';
 	import TextArea from '../form/Textarea.svelte';
 	import Counter from '../form/Counter.svelte';
-import Select from '../form/Select.svelte';
+	import Select from '../form/Select.svelte';
+	
 	let url = "Enter data to start creating URL";
 
 	let urlComponents = new Map();
@@ -15,24 +16,10 @@ import Select from '../form/Select.svelte';
 	dpaMappings.set("Item 1B", "I1B");
 	dpaMappings.set("Item 1C", "I1C");
 
-	let geoMappings = new Map();
-	geoMappings.set("North America", "AMER");
-	geoMappings.set("Global", "GBL");
-	geoMappings.set("Latin America", "LATAM");
-	geoMappings.set("EMEA", "EMEA");
-	geoMappings.set("Asia Pacific", "APAC");
-
-	let geos = [
-		{label: "North America", value: "AMER"},
-		{label: "Global", value: "GBL"},
-		{label: "Latin America", value: "LATAM"},
-		{label: "EMEA", value: "EMEA"},
-		{label: "Asia Pacific", value: "APAC"}
-	]	
+	let geos = window.electronAPI.getConfig()?.Geos;
 
 	// Add maps to name map
 	keyMappings.set("dataPointA", dpaMappings);
-	keyMappings.set("geo", geoMappings);
 
 	const handleChange = (e) => {
 		console.log(`${e.target.dataset.index}: ${e.target.name} - ${e.target.value}`);
@@ -44,7 +31,11 @@ import Select from '../form/Select.svelte';
 		urlComponents.set(e.target.dataset.index, `${e.target.name}:${e.target.value}`);
 		updateUrl();
 	}
-
+	
+	// Set replacement pattern and replacement symbol
+	let replaceConfig = window.electronAPI.getConfig()?.ReplacePattern;
+	let replacePattern = new RegExp(replaceConfig.pattern, 'g');
+	let replaceSymbol = replaceConfig.symbol;
 	const updateUrl = () => {
 		let sorted = Array.from(indices).sort();
 		
@@ -56,7 +47,8 @@ import Select from '../form/Select.svelte';
 			url += `${mappedValue}_`;
 		})
 
-		url = url.replaceAll(/\s/g, '-');
+		url = url.replaceAll(replacePattern, replaceSymbol);
+		url = url.substring(0, url.length - 1);
 	}
 
 	const getMappedValue = (pair) => {
@@ -68,7 +60,6 @@ import Select from '../form/Select.svelte';
 	<Input label="Campaign ID" name="campaignID" placeholder="Campaign ID" on:input={handleChange} index={1} />
 	<Input label="Data Point A" name="dataPointA" placeholder="Enter Data Point A" on:input={handleChange} index={2} />
 	<Input label="Data Point B" name="dataPointB" placeholder="Eneter Data Point B" on:input={handleChange} index={3} />
-	<!-- <Input label="Geo" name="geo" placeholder="Enter GEO" on:input={handleChange} index={4} /> -->
 	<Select label="Geo" name="geo" placeholder="Enter GEO" on:input={handleChange} options={geos} index={4} />
 	<Input label="Campaign Details" name="campaignDetails" placeholder="Enter Campaign Details" on:input={handleChange} index={5} />
 	<Input label="Campaign Type" name="campaignType" placeholder="Enter Campaign Type" on:input={handleChange} index={6} />

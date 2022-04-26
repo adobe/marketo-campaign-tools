@@ -4,7 +4,7 @@
     let files;
 
     onMount(async() => {
-        let loadedConfiguration = window.electronAPI.getConfig()?.userConfigPath;
+        let loadedConfiguration = window.electronAPI.getConfig()?.configurationPath;
         if (loadedConfiguration) {
             console.log("Loaded configuration");
             files = [loadedConfiguration];

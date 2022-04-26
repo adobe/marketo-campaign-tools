@@ -56,7 +56,10 @@ const createWindow = () => {
             fh.readFile("utf-8")
                 .then(contents => {
                     let contentsJson = JSON.parse(contents);
-                    Object.assign(contentsJson, {"userConfigPath":userConfigPath});
+                    Object.assign(contentsJson, {
+                        "userConfigPath" : userConfigPath, 
+                        "configurationPath" : conf.configPath
+                    });
                     console.log(contentsJson);
                     mainWindow.webContents.send('configuration-loaded',contentsJson);            
                 })
