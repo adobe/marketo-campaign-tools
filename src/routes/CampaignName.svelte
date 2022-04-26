@@ -4,7 +4,8 @@
 	import Counter from '../form/Counter.svelte';
 	import Select from '../form/Select.svelte';
 	
-	let url = "Enter data to start creating URL";
+	let urlPlaceholder = "Enter data to start creating URL";
+	let url = urlPlaceholder;
 
 	let urlComponents = new Map();
 	let indices = new Set();
@@ -34,6 +35,8 @@
 	
 	// Set replacement pattern and replacement symbol
 	let replaceConfig = window.electronAPI.getConfig()?.ReplacePattern;
+	replaceConfig = replaceConfig ? replaceConfig : { pattern: "\\s", symbol: "-"};
+
 	let replacePattern = new RegExp(replaceConfig.pattern, 'g');
 	let replaceSymbol = replaceConfig.symbol;
 	const updateUrl = () => {
@@ -65,7 +68,7 @@
 	<Input label="Campaign Type" name="campaignType" placeholder="Enter Campaign Type" on:input={handleChange} index={6} />
 	
 	<TextArea name="generatedUrl" text={url} />
-	<Counter label={"Number of characters:"} count={url.length} />
+	<Counter label={"Number of characters:"} count={url === urlPlaceholder ? 0 : url.length} />
 </main>
 
 <style>
