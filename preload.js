@@ -1,5 +1,6 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
+// TODO: This is empty on reload (cmd+r). Figure out how to fix that problem.
 let config = {};
 
 ipcRenderer.on(`configuration-loaded`, (e, conf) => {
@@ -9,6 +10,6 @@ ipcRenderer.on(`configuration-loaded`, (e, conf) => {
 })
 
 contextBridge.exposeInMainWorld('electronAPI', {
-    getConfig: () => { console.log(`Here's the web configuration: ${JSON.stringify(config, 2)}`); return config}, 
+    getConfig: () => { return config }, 
     setUploadPath: (fileName, path) => ipcRenderer.send('set-file-upload', fileName, path, config)
 });

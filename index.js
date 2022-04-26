@@ -51,13 +51,20 @@ const createWindow = () => {
     });
 
     openUserConfig().then(contents => {
-        console.log(contents);
         let conf = JSON.parse(contents);
         fs.open(conf.configPath).then(fh => {
             fh.readFile("utf-8")
                 .then(contents => {
-                    mainWindow.webContents.send('configuration-loaded', JSON.parse(contents));            
+                    let contentsJson = JSON.parse(contents);
+                    Object.assign(contentsJson, {"userConfigPath":userConfigPath});
+                    console.log(contentsJson);
+                    mainWindow.webContents.send('configuration-loaded',contentsJson);            
                 })
+                .finally(() => {
+                    fh.close();
+                })
+        }).catch(err => {
+            mainWindow.webContents.send('no-configuration-found', {});
         })
     })
 
