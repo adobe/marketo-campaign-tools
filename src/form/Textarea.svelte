@@ -5,9 +5,7 @@
 
 <div>
     <h2>Campaign Name</h2>
-    <textarea {name} rows="3" cols="100" disabled>
-        {text}
-    </textarea>
+    <textarea {name} placeholder="Enter data to start creating URL" rows="3" cols="100" disabled >{text}</textarea>
 </div>
 
 <style>

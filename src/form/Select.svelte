@@ -4,8 +4,7 @@
     export let placeholder = "Select";
     export let index;
     export let options = [];
-
-    let value;
+    export let value;
 </script>
 
 <div>

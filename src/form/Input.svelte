@@ -5,8 +5,7 @@
     export let label;
     export let placeholder = "";
     export let index;
-
-    let value;
+    export let value;
 </script>
 
 <div>

@@ -5,7 +5,7 @@
     let config = {};
 
     onMount(async() => {
-        let loadedConfiguration = window.electronAPI.getConfig()?.configurationPath;
+        let loadedConfiguration = window.eapi.getConfig()?.configurationPath;
         if (loadedConfiguration) {
             console.log("Loaded configuration");
             files = [loadedConfiguration];
@@ -13,11 +13,11 @@
     })
 
     const setFileToUpload = () => {
-        window.electronAPI.setUploadPath(files[0].name, files[0].path);
+        window.eapi.setUploadPath(files[0].name, files[0].path);
     }
 
     const showConfigration = () => {
-        config = window.electronAPI.getConfig();
+        config = window.eapi.getConfig();
         console.log(`The current configuration is: ${JSON.stringify(config, 2)}`);
     }
 </script>
