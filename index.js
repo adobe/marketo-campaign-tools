@@ -37,6 +37,19 @@ const createLocalConfig = (config) => {
     }
 }
 
+const updateConfiguration = (config) => {
+    if (config !== undefined) {
+        console.dir(config);
+        let toolkitConfigPath = config.configurationPath;
+
+        fs.writeFile(toolkitConfigPath, JSON.stringify(config), 'utf-8')
+            .then(() => { console.log ("File successfully written")})
+            .catch((err) => { console.log(err); })
+    } else {
+        console.log(`Local configuration file method was called without a configuration`);
+    }
+}
+
 const openUserConfig = () => {
     const { O_RDONLY } = constants;
 
@@ -44,7 +57,14 @@ const openUserConfig = () => {
 }
 
 const createWindow = () => {
+
+    const { screen } = require('electron');
+    const display = screen.getPrimaryDisplay();
+    const { width, height } = display.workAreaSize;
+
     const mainWindow = new BrowserWindow({
+        width: parseInt(width * 0.7),
+        height: parseInt(height * 0.6),
         webPreferences: {
             preload: path.join(__dirname, 'preload.js')
         }
@@ -92,6 +112,10 @@ const createWindow = () => {
             console.error(`Error while attempting to open ${path}`);
             console.error(err);
         })
+    })
+
+    ipcMain.on('configuration-updated', (e, conf) => {
+        updateConfiguration(conf);
     })
     
     mainWindow.loadFile(path.join(__dirname, "public/index.html"));

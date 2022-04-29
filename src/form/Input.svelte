@@ -9,7 +9,7 @@
 </script>
 
 <div>
-    <label for={name}>{label}</label>
+    {#if label}<label for={name}>{label}</label>{/if}
     <input type="text" bind:value {name} {placeholder} on:input data-index={index}>
 </div>
 
