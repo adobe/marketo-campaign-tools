@@ -30,5 +30,6 @@ contextBridge.exposeInMainWorld('eapi', {
         } else {
             return conf.UrlBuilder?.entries || {};
         }
-    }
+    }, 
+    exportEntries: () => ipcRenderer.invoke('create-url-exports', config.UrlBuilder.entries, config.CampaignDetails.name)
 });

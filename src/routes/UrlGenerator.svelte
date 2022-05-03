@@ -44,11 +44,20 @@
 		window.eapi.entries(entries);
 		console.log(e.detail.entry);
 	}
-	
+
+	const exportEntries = async () => {
+		window.eapi.exportEntries()
+			.then((result) => {
+				console.log(`Received ${result}`);
+				window.open(result);
+			})
+			.catch(err => console.log(err));
+	}
 </script>
 <main>
 	<div class="campaign-name">
 		<h2>Campaign Name:</h2> {window.eapi.campaignName()}
+		<button type="button" on:click={exportEntries}>Export</button>
 	</div>
 
 	<div class="url-listings">
@@ -80,7 +89,7 @@
 <style>
 	.campaign-name {
 		display: grid;
-		grid-template-columns: 1fr 3fr;
+		grid-template-columns: 1fr 3fr 1fr;
 		align-items: center;
 	}
 
