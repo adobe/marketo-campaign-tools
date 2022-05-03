@@ -5,3 +5,6 @@
 .DS_Store
 Requirements.md
 yarn-error.log
+
+# Electron Build - will be handled through releases
+/dist/
