@@ -2,69 +2,127 @@
 	import Input from '../form/Input.svelte';
 	import TextArea from '../form/Textarea.svelte';
 	import Counter from '../form/Counter.svelte';
-	let url = "Enter data to start creating URL";
+	import Select from '../form/Select.svelte';
+	
+	let cName = '';
+	let previousUrl = '';
 
 	let urlComponents = new Map();
 	let indices = new Set();
 
-	// TODO: Set this from a config
-	let keyMappings = new Map();
-	let dpaMappings = new Map();
-	dpaMappings.set("Item 1A", "I1A");
-	dpaMappings.set("Item 1B", "I1B");
-	dpaMappings.set("Item 1C", "I1C");
+	// Establish the first set of campaign details immediately
+	// TODO: Determine default index positions
+	let inputs = {
+		"campaignID": {
+			"label": "Campaign ID",
+			"placeholder": "Input Campaign ID",
+			"index": 1,
+			"type": "input",
+			"subs": {}
+    	},
+		"campaignDetails": {
+			"label": "Campaign Details",
+			"placeholder": "Details",
+			"index": 5,
+			"type": "input",
+			"subs": {}
+    	},
+		"campaignType": {
+			"label": "Campaign Type",
+			"placeholder": "Input Type",
+			"index": 6,
+			"type": "input",
+			"subs": {}
+    	},
+	};
+	
+	let delimiter = "_";
+	let config = {};
 
-	let geoMappings = new Map();
-	geoMappings.set("North America", "AMER");
-	geoMappings.set("Global", "GBL");
-	geoMappings.set("Latin America", "LATAM");
-	geoMappings.set("EMEA", "EMEA");
-	geoMappings.set("Asia Pacific", "APAC");
+	config = window.eapi.getConfig();
+	cName = window.eapi.campaignName() || '';
 
-	// Add maps to name map
-	keyMappings.set("dataPointA", dpaMappings);
-	keyMappings.set("geo", geoMappings);
+	if (config !== undefined) {
+		Object.assign(inputs, config.Inputs);
+		delimiter = config.Delimiter
+	}
 
-	const handleChange = (e) => {
-		console.log(`${e.target.dataset.index}: ${e.target.name} - ${e.target.value}`);
-		console.log(e.target);
+	// Set replacement pattern and replacement symbol
+
+	let replaceConfig = config.ReplacePattern || { pattern: "\\s", symbol: "-"};
+	
+	let replacePattern = new RegExp(replaceConfig.pattern, 'g');
+	let replaceSymbol = replaceConfig.symbol;
+
+
+	// Functions
+	const handleChange = (e, input) => {
 		
 		// Add to indicies for sorting
 		indices.add(e.target.dataset.index);
 		// Add to set for composing
-		urlComponents.set(e.target.dataset.index, `${e.target.name}:${e.target.value}`);
+		input.value = e.target.value;
+		urlComponents.set(e.target.dataset.index, input); 
 		updateUrl();
 	}
-
+	
 	const updateUrl = () => {
 		let sorted = Array.from(indices).sort();
 		
-		// TODO: Figure out mapping of names to entries
-		url = '';
+		cName = '';
 		sorted.forEach(i => {
-			let valuePair = urlComponents.get(i).split(":");
-			let mappedValue = getMappedValue(valuePair);
-			url += `${mappedValue}_`;
+			cName += `${getSubstitutions(urlComponents.get(i))}${delimiter}`;
 		})
 
-		url = url.replaceAll(/\s/g, '-');
+		cName = cName.replaceAll(replacePattern, replaceSymbol);
+		cName = cName.substring(0, cName.length - 1);
 	}
 
-	const getMappedValue = (pair) => {
-		let mappedValue = keyMappings?.get(pair[0])?.get(pair[1]);
-		return mappedValue === undefined ? pair[1] : mappedValue;
+	const getSubstitutions = (input) => {
+		if (input.subs) {
+			return input.subs[input.value] ? input.subs[input.value] : input.value;
+		} 
+		return input.value;
 	}
+
+	// Configure auto-save patterns
+	setInterval(() => {
+		if (cName !== previousUrl) {
+			config.Inputs = inputs;
+			config.CampaignDetails = config.CampaignDetails || {};
+			config.CampaignDetails.name = cName;
+			window.eapi.updateConfig(config)
+			window.eapi.campaignName(cName);
+			previousUrl = cName;
+		}
+	}, 3000)
 </script>
 <main>
-	<Input label="Campaign ID" name="campaignID" placeholder="Campaign ID" on:input={handleChange} index={1} />
-	<Input label="Data Point A" name="dataPointA" placeholder="Enter Data Point A" on:input={handleChange} index={2} />
-	<Input label="Data Point B" name="dataPointB" placeholder="Eneter Data Point B" on:input={handleChange} index={3} />
-	<Input label="Geo" name="geo" placeholder="Enter GEO" on:input={handleChange} index={4} />
-	<Input label="Campaign Details" name="campaignDetails" placeholder="Enter Campaign Details" on:input={handleChange} index={5} />
-	<Input label="Campaign Type" name="campaignType" placeholder="Enter Campaign Type" on:input={handleChange} index={6} />
-	
-	<TextArea name="generatedUrl" text={url} />
-	<Counter label={"Number of characters:"} count={url.length} />
+	{#each Object.keys(inputs) as key }
+		{#if inputs[key].type === "select"}
+			<Select 
+				label="{inputs[key].label}" 
+				name="{key}" placeholder="{inputs[key].placeholder}" 
+				on:input={(e) => handleChange(e, inputs[key])} 
+				options={inputs[key].options} 
+				index={inputs[key].index} 
+				value={inputs[key].value ? inputs[key].value : ''}
+			/>
+		{:else}
+			<Input 
+				label="{inputs[key].label}" 
+				name="{key}" 
+				placeholder="{inputs[key].placeholder}" 
+				on:input={(e) => handleChange(e, inputs[key])} 
+				index={inputs[key].index} 
+				value={inputs[key].value ? inputs[key].value : ''}
+			/>
+		{/if}
+	{/each}
+
+	<!-- This area is for output only  -->
+	<TextArea name="generatedUrl" text={cName} />
+	<Counter label={"Number of characters:"} count={cName.length} />
 </main>
 
 <style>

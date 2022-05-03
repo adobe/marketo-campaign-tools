@@ -2,7 +2,9 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const os = require('os');
 const fs = require('fs/promises');
-const { open, write, constants } = require('fs');
+const { constants, createWriteStream } = require('fs');
+const { format } = require('@fast-csv/format');
+const http = require('http');
 
 let userConfigPath = path.join(os.homedir(),".marketo-toolkit");
 
@@ -37,6 +39,19 @@ const createLocalConfig = (config) => {
     }
 }
 
+const updateConfiguration = (config) => {
+    if (config !== undefined) {
+        console.dir(config);
+        let toolkitConfigPath = config.configurationPath;
+
+        fs.writeFile(toolkitConfigPath, JSON.stringify(config), 'utf-8')
+            .then(() => { console.log ("File successfully written")})
+            .catch((err) => { console.log(err); })
+    } else {
+        console.log(`Local configuration file method was called without a configuration`);
+    }
+}
+
 const openUserConfig = () => {
     const { O_RDONLY } = constants;
 
@@ -44,7 +59,14 @@ const openUserConfig = () => {
 }
 
 const createWindow = () => {
+
+    const { screen } = require('electron');
+    const display = screen.getPrimaryDisplay();
+    const { width, height } = display.workAreaSize;
+
     const mainWindow = new BrowserWindow({
+        width: parseInt(width * 0.7),
+        height: parseInt(height * 0.6),
         webPreferences: {
             preload: path.join(__dirname, 'preload.js')
         }
@@ -56,7 +78,10 @@ const createWindow = () => {
             fh.readFile("utf-8")
                 .then(contents => {
                     let contentsJson = JSON.parse(contents);
-                    Object.assign(contentsJson, {"userConfigPath":userConfigPath});
+                    Object.assign(contentsJson, {
+                        "userConfigPath" : userConfigPath, 
+                        "configurationPath" : conf.configPath
+                    });
                     console.log(contentsJson);
                     mainWindow.webContents.send('configuration-loaded',contentsJson);            
                 })
@@ -90,9 +115,32 @@ const createWindow = () => {
             console.error(err);
         })
     })
+
+    ipcMain.on('configuration-updated', (e, conf) => {
+        updateConfiguration(conf);
+    })
     
     mainWindow.loadFile(path.join(__dirname, "public/index.html"));
 };
+
+ipcMain.handle('create-url-exports', async (e, entries, campaignName) => {
+    let filePath = path.join(os.tmpdir(), 'excel-exports.csv')
+    let exportFile = createWriteStream(filePath);
+    const stream = format({headers: true });
+    stream.pipe(exportFile);
+    Object.values(entries).forEach((entry) => {
+        let row = {}
+        row.campaignName = campaignName;
+        Object.assign(row, entry.values);
+        row.url = entry.url;
+    
+        stream.write(row);
+    });
+    stream.end();
+    return filePath;
+})
+
+// http.get('/exports')
 
 app.whenReady().then(() => {
     createWindow();

@@ -1,16 +1,19 @@
 <script>
-    import { createEventDispatcher } from 'svelte';
-
     export let name;
     export let label;
-    export let placeholder = "";
+    export let placeholder = "Select";
     export let index;
+    export let options = [];
     export let value;
 </script>
 
 <div>
     {#if label}<label for={name}>{label}</label>{/if}
-    <input type="text" bind:value {name} {placeholder} on:input data-index={index}>
+    <select bind:value {name} {placeholder} on:input data-index={index}>
+        {#each options as { label, value }}
+            <option value={value}>{label}</option>
+        {/each}
+    </select>
 </div>
 
 <style>
