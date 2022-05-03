@@ -65,7 +65,7 @@
 				on:input={(e) => handleChange(e, inputs[key])} 
 				options={inputs[key].options} 
 				index={inputs[key].index} 
-				value={values[key] || ''}
+				value={values ? (values[key] || '') : ''}
 			/>
 		{:else}
 			<Input 

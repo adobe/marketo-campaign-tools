@@ -3,7 +3,6 @@ const { contextBridge, ipcRenderer } = require('electron');
 // TODO: This is empty on reload (cmd+r). Figure out how to fix that problem.
 let config = {};
 let campaignName = '';
-let entries = new Map();
 
 ipcRenderer.on(`configuration-loaded`, (e, conf) => {
     config = conf;
@@ -25,12 +24,11 @@ contextBridge.exposeInMainWorld('eapi', {
     }, 
     entries: (entries) => {
         if (entries) {
-            conf.UrlBuilder = conf.UrlBuilder || {};
-            conf.UrlBuilder.Entries = conf.UrlBuilder.Entries || entries;
-            
-            // update entries
+            config.UrlBuilder = config.UrlBuilder || {};
+            config.UrlBuilder.entries = entries;
+            ipcRenderer.send('configuration-updated', config);
         } else {
-            return entries;
+            return conf.UrlBuilder?.entries || {};
         }
     }
 });

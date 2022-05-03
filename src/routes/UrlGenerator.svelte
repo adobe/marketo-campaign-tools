@@ -32,33 +32,7 @@
 		};
 	let builderFields = conf?.UrlBuilder?.inputs || defaultFields;
 
-	// TODO: Get this from the configuration
-	const entries = {
-		1: {
-			index: 1, 
-			url: 'http://', 
-			values: {
-				"baseUrl": "http://adobe.com",
-				"medium": "ghostTalker", 
-				"source": "fakeNews",
-				"term": "limited"
-			}
-		},
-		2: {
-			index: 2, 
-			url: 'file://',
-			values: {
-				"baseUrl": "http://google.com",
-				"medium": "APAC", 
-				"source": "unknown",
-				"term": "90day"
-			}
-		},
-		3: {
-			index: 3, 
-			url: 'http://www.adobe.com'
-		}
-	}
+	const entries = conf?.UrlBuilder?.entries || {};
 
 	// Functions
 	const addNewRow = () => {
@@ -66,9 +40,8 @@
 	}
 
 	const urlUpdated = (e) => {
-		
-		// Add to entry to array and reassign entries to itself to trigger svelte reactivity
 		entries[e.detail.index] = e.detail.entry;
+		window.eapi.entries(entries);
 		console.log(e.detail.entry);
 	}
 	
