@@ -39,23 +39,45 @@ const createLocalConfig = (config) => {
     }
 }
 
-const updateConfiguration = (config) => {
-    if (config !== undefined) {
-        console.dir(config);
-        let toolkitConfigPath = config.configurationPath;
-
-        fs.writeFile(toolkitConfigPath, JSON.stringify(config), 'utf-8')
-            .then(() => { console.log ("File successfully written")})
-            .catch((err) => { console.log(err); })
-    } else {
+const updateConfiguration = async (config) => { 
+   
+    if (config === undefined) {
         console.log(`Local configuration file method was called without a configuration`);
     }
+
+    let toolkitConfigPath = config.configurationPath;
+    let err = await fs.writeFile(toolkitConfigPath, JSON.stringify(config), 'utf-8');
+    if (err !== undefined) {
+        console.error(err);
+        return false;
+    } else {
+        return true;
+    }
 }
+   
 
 const openUserConfig = () => {
     const { O_RDONLY } = constants;
 
     return fs.readFile(userConfigPath, 'utf-8');
+}
+
+// TODO: Test this against empty configruations (local user and toolkit level)
+const loadConfiguration = async (func) => {
+    let contents = await openUserConfig();
+    let conf = JSON.parse(contents);
+    let fh = await fs.open(conf.configPath);
+    let fileContents = await fh.readFile("utf-8"); 
+
+    let configJson = JSON.parse(fileContents);
+    Object.assign(configJson, 
+        {
+            "userConfigPath" : userConfigPath, 
+            "configurationPath" : conf.configPath
+        }
+    );
+    func(configJson);
+    fh.close();
 }
 
 const createWindow = () => {
@@ -72,56 +94,49 @@ const createWindow = () => {
         }
     });
 
-    openUserConfig().then(contents => {
-        let conf = JSON.parse(contents);
-        fs.open(conf.configPath).then(fh => {
-            fh.readFile("utf-8")
-                .then(contents => {
-                    let contentsJson = JSON.parse(contents);
-                    Object.assign(contentsJson, {
-                        "userConfigPath" : userConfigPath, 
-                        "configurationPath" : conf.configPath
-                    });
-                    console.log(contentsJson);
-                    mainWindow.webContents.send('configuration-loaded',contentsJson);            
-                })
-                .finally(() => {
-                    fh.close();
-                })
-        }).catch(err => {
-            mainWindow.webContents.send('no-configuration-found', {});
-        })
-    })
-
-
-    ipcMain.on('set-file-upload', (e, fileName, path) => {
-        
-        console.log(`File to upload would be ${path} with name ${fileName}`);
-        createLocalConfig({configPath: path, updated: new Date()});
-
-        fs.open(path).then(fh => {
-            fh.readFile("utf-8")
-                .then(contents => {
-                    let conf = JSON.parse(contents);
-                    console.log(`Setting configuration to ${JSON.stringify(conf, 2)}`);
-                    e.reply(`configuration-loaded`, conf);
-                })
-                .finally(() => {
-                    fh.close();
-                })
-        })
-        .catch((err) => {
-            console.error(`Error while attempting to open ${path}`);
-            console.error(err);
-        })
-    })
-
-    ipcMain.on('configuration-updated', (e, conf) => {
-        updateConfiguration(conf);
-    })
+    loadConfiguration((contentsJson) => {mainWindow.webContents.send('configuration-loaded',contentsJson)});
     
     mainWindow.loadFile(path.join(__dirname, "public/index.html"));
+    
+    // TODO: Remove after dev (or make optional via arg)
+    mainWindow.webContents.openDevTools()
 };
+
+ipcMain.handle('configuration-updated', async (e, conf) => {
+    return await updateConfiguration(conf);
+});
+
+ipcMain.handle('load-configuration', async(e) => {
+    let conf; 
+    await loadConfiguration((contents) => { conf = contents });
+    return conf;
+})
+
+ipcMain.handle('set-file-upload', async (e, fileName, path) => {
+
+    console.log(`File to upload would be ${path} with name ${fileName}`);
+    createLocalConfig({configPath: path, updated: new Date()});
+
+    fs.open(path).then(fh => {
+        fh.readFile("utf-8")
+            .then(contents => {
+                let conf = JSON.parse(contents);
+                console.log(`Setting configuration to ${JSON.stringify(conf, 2)}`);
+                return conf;
+            })
+            .catch((err) => { 
+                console.error(err);
+                return {}; 
+            })
+            .finally(() => {
+                fh.close();
+            })
+    })
+    .catch((err) => {
+        console.error(`Error while attempting to open ${path}`);
+        reject(err);
+    })
+});
 
 ipcMain.handle('create-url-exports', async (e, entries, campaignName) => {
     let filePath = path.join(os.tmpdir(), 'excel-exports.csv')

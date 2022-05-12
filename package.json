@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "rollup -c",
-    "dev": "rollup -c -w",
+    "dev": "rollup -c -w && yarn start",
+    "local": "yarn build && yarn start",
     "start": "electron-forge start",
     "dist": "yarn build && electron-builder",
     "package": "electron-forge package",
@@ -43,24 +44,19 @@
             "name": "marketo_reporting_framework_toolkit"
           },
           "platforms": [
-            "darwin",
-            "linux",
-            "win"
-          ]
-        },
-        {
-          "name": "@electron-forge/maker-zip",
-          "platforms": [
             "darwin"
           ]
         },
         {
-          "name": "@electron-forge/maker-deb",
-          "config": {}
-        },
-        {
-          "name": "@electron-forge/maker-rpm",
-          "config": {}
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "name": "marketo-toolkit",
+            "author": "Douglas Ross", 
+            "description": "A toolkit to support Marketo customers in creating and managing their campaign names and related URLs"
+          },
+          "platforms": [
+            "win32"
+          ]
         }
       ]
     }
