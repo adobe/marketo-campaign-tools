@@ -9,7 +9,6 @@
             console.log("Loaded configuration");
             files = [config.configurationPath];
         }
-
         return true
     })
 

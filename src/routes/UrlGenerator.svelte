@@ -2,7 +2,9 @@
 	// let config = window.eapi.getConfig();
 	import UrlGroup from '../form/UrlGroup.svelte';
 
-	let conf = window.eapi.getConfig();
+	let conf = {};
+	let builderFields = {};
+	
 	let defaultFields = {
             "baseUrl": {
                 "placeholder": "Base URL",
@@ -30,20 +32,40 @@
                 "index": 2
             }
 		};
-	let builderFields = conf?.UrlBuilder?.inputs || defaultFields;
 
-	const entries = conf?.UrlBuilder?.entries || {};
+	let entries = {};
+	
+	const init = (async () => {
+		conf = await window.eapi.getConfig();
+		builderFields = conf?.UrlBuilder?.inputs || defaultFields;
+		entries = conf?.UrlBuilder?.entries || {};
+	});		
+	let configurationLoaded = init();
 
 	// Functions
 	const addNewRow = () => {
 		console.log("adding new row");
 	}
 
+	let updateTimer;
 	const urlUpdated = (e) => {
+		
+		clearTimeout(updateTimer);
+		
 		entries[e.detail.index] = e.detail.entry;
-		window.eapi.entries(entries);
+		conf.UrlBuilder = conf.UrlBuilder || {};
+		conf.UrlBuilder.entries = entries;
 		console.log(e.detail.entry);
+
+		updateTimer = setTimeout(() => {
+			saveConfig(conf);
+		}, 500)
 	}
+
+	const saveConfig = ((config) => {
+		window.eapi.updateConfig(config)
+			.then(updated => console.log(`Configuration was updated: ${updated}`));
+	})
 
 	const exportEntries = async () => {
 		window.eapi.exportEntries()
@@ -55,35 +77,39 @@
 	}
 </script>
 <main>
-	<div class="campaign-name">
-		<h2>Campaign Name:</h2> {window.eapi.campaignName()}
-		<button type="button" on:click={exportEntries}>Export</button>
-	</div>
-
-	<div class="url-listings">
-		<div class="url-listings__headers url-listings__section">
-			<!-- Headers -->
-			<h3>Index</h3>
-			{#each Object.values(builderFields) as {placeholder}}
-				<h3>{placeholder}</h3>
-			{/each}
+	{#await configurationLoaded}
+		<div>Loading...</div>
+	{:then}
+		<div class="campaign-name">
+			<h2>Campaign Name:</h2> {conf.CampaignDetails.name}
+			<button type="button" on:click={exportEntries}>Export</button>
 		</div>
-		<div class="url-listings__section inputs">
-			{#each Object.values(entries) as {index, values}}
-			<div>{index}</div>
-				<UrlGroup entryKey={index} inputs={builderFields} values={values} on:urlUpdated={urlUpdated}></UrlGroup>
-			{/each}
-			<div>
-				<button type="button" on:click={addNewRow}>+</button>
+
+		<div class="url-listings">
+			<div class="url-listings__headers url-listings__section">
+				<!-- Headers -->
+				<h3>Index</h3>
+				{#each Object.values(builderFields) as {placeholder}}
+					<h3>{placeholder}</h3>
+				{/each}
+			</div>
+			<div class="url-listings__section inputs">
+				{#each Object.values(entries) as {index, values}}
+				<div>{index}</div>
+					<UrlGroup entryKey={index} inputs={builderFields} values={values} on:urlUpdated={urlUpdated}></UrlGroup>
+				{/each}
+				<div>
+					<button type="button" on:click={addNewRow}>+</button>
+				</div>
+			</div>
+			<div class="url-listings__section outputs">
+				{#each Object.values(entries) as { index, url }}
+					<div>{index}</div>
+					<input type="text" disable class="url-output" value="{url}" />
+				{/each}
 			</div>
 		</div>
-		<div class="url-listings__section outputs">
-			{#each Object.values(entries) as { index, url }}
-				<div>{index}</div>
-				<input type="text" disable class="url-output" value="{url}" />
-			{/each}
-		</div>
-	</div>
+	{/await}
 </main>
 
 <style>
