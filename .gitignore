@@ -8,3 +8,5 @@ yarn-error.log
 
 # Electron Build - will be handled through releases
 /dist/
+
+out/
