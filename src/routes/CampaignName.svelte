@@ -3,6 +3,7 @@
 	import TextArea from '../form/Textarea.svelte';
 	import Counter from '../form/Counter.svelte';
 	import Select from '../form/Select.svelte'; 
+	import Date from '../form/Date.svelte';
 
 	let urlComponents = new Map();
 	let indices = new Set();
@@ -10,13 +11,12 @@
 
 	// Establish the first set of campaign details immediately
 	let inputs = {
-		"campaignID": {
-			"label": "Campaign ID",
-			"placeholder": "Input Campaign ID",
-			"index": 1,
-			"type": "input",
+		"campaignDate": {
+			"label": "Campaign Date",
+			"index": 9,
+			"type": "date",
 			"subs": {}
-    	},
+		},
 		"campaignDetails": {
 			"label": "Campaign Details",
 			"placeholder": "Details",
@@ -41,7 +41,7 @@
 		config = await window.eapi.getConfig();
 		
 		if (config !== undefined) {
-			Object.assign(inputs, config.Inputs);
+			Object.assign(inputs, config.CampaignDetails?.Inputs);
 			delimiter = config.Delimiter;	
 		}
 		config.CampaignDetails = config.CampaignDetails || {"name": ""}
@@ -55,7 +55,7 @@
 	// Functions
 	
 	const setIndicies = (() => {
-		Object.values(config.Inputs).forEach((input) => {
+		Object.values(config.CampaignDetails?.Inputs).forEach((input) => {
 			if (input.value) {
 				addToIndexAndComponents(input);
 			}
@@ -98,6 +98,7 @@
 		cName = cName.substring(0, cName.length - 1);
 		
 		config.CampaignDetails.name = cName;
+		config.CampaignDetails.Inputs = inputs;
 
 		updateTimer = setTimeout(() => {
 			saveConfig(config);
@@ -119,7 +120,7 @@
 <main>
 	{#await initialization}
 		<div>...loading</div>
-	{:then config}
+	{:then}
 		{#each Object.keys(inputs) as key }
 			{#if inputs[key].type === "select"}
 				<Select 
@@ -130,6 +131,13 @@
 					index={inputs[key].index} 
 					bind:value={inputs[key].value}
 				/>
+			{:else if inputs[key].type === "date"}
+				<Date 
+					label="{inputs[key].label}" 
+					name="{key}" 
+					on:change={(e) => handleChange(e, inputs[key])} 
+					index={inputs[key].index} 
+					bind:value={inputs[key].value} />
 			{:else}
 				<Input 
 					label="{inputs[key].label}" 

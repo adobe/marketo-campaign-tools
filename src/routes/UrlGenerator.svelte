@@ -44,7 +44,8 @@
 
 	// Functions
 	const addNewRow = () => {
-		console.log("adding new row");
+		let nextIndex = Object.keys(entries).length + 1;
+		entries[nextIndex.toString()] = {index: nextIndex };
 	}
 
 	let updateTimer;
@@ -55,7 +56,6 @@
 		entries[e.detail.index] = e.detail.entry;
 		conf.UrlBuilder = conf.UrlBuilder || {};
 		conf.UrlBuilder.entries = entries;
-		console.log(e.detail.entry);
 
 		updateTimer = setTimeout(() => {
 			saveConfig(conf);
@@ -96,7 +96,7 @@
 			<div class="url-listings__section inputs">
 				{#each Object.values(entries) as {index, values}}
 				<div>{index}</div>
-					<UrlGroup entryKey={index} inputs={builderFields} values={values} on:urlUpdated={urlUpdated}></UrlGroup>
+					<UrlGroup entryKey={index} prefix={conf.UrlBuilder?.prefix} inputs={builderFields} values={values} on:urlUpdated={urlUpdated}></UrlGroup>
 				{/each}
 				<div>
 					<button type="button" on:click={addNewRow}>+</button>
