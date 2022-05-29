@@ -55,7 +55,9 @@
 	// Functions
 	
 	const setIndicies = (() => {
-		Object.values(config.CampaignDetails?.Inputs).forEach((input) => {
+		inputs = Object.fromEntries(Object.entries(inputs).sort(([,a],[,b]) => a.index - b.index))
+		window.eapi.sortConfig(config);
+		Object.values(inputs).forEach((input) => {
 			if (input.value) {
 				addToIndexAndComponents(input);
 			}
@@ -90,6 +92,9 @@
 		let replaceSymbol = config.ReplacePattern.symbol;
 		let sorted = Array.from(indices).sort();
 		
+		console.log("URL Components");
+		console.dir(urlComponents)
+
 		cName = '';
 		sorted.forEach(i => {
 			cName += `${getSubstitutions(urlComponents.get(i))}${delimiter}`;
@@ -164,13 +169,6 @@
 		max-width: 240px;
 		margin: 0 auto;
 	}
-
-	/* h1 {
-		color: #ff3e00;
-		text-transform: uppercase;
-		font-size: 4em;
-		font-weight: 100;
-	} */
 
 	@media (min-width: 640px) {
 		main {

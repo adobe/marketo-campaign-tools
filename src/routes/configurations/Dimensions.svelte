@@ -2,9 +2,12 @@
 import Input from "../../form/Input.svelte";
 import Select from "../../form/Select.svelte";
 
-
 let config = {};
 let inputs = {};
+let typeToAdd = "Select";
+
+// TODO: Set this handling across application
+sessionStorage.setItem("lastPage", "Dimensions");
 
 const init = async() => {
     config = await window.eapi.getConfig();
@@ -22,14 +25,13 @@ const handleInputUpdate = ((e, key, input) => {
 })
 
 const handleFieldUpdate = ((e, key, field) => {
-    config.CampaignDetails.Inputs[key][field] = e.target.value;            
+    config.CampaignDetails.Inputs[key][field] = e.target.value;
     inputs = config.CampaignDetails.Inputs;
 })
 
 const handleSubsKeyUpdate = ((e, key, input, sub) => {
-    let previousVal = input.subs[sub];
+    input.subs[e.target.value] = input.subs[sub];
     delete input.subs[sub];
-    input.subs[e.target.value] = previousVal;
     inputs[key] = input;
     config.CampaignDetails.Inputs = inputs;
 })
@@ -40,8 +42,23 @@ const handleSubsValueUpdate = ((e, key, input, sub) => {
     config.CampaignDetails.Inputs = inputs;
 })
 
+const addNewSub = ((key) => {
+    let input = inputs[key];
+    input.subs["newSub"] = "";
+    inputs[key] = input;
+    config.CampaignDetails.Inputs = inputs;
+});
+
+const removeSub = ((k, s) => {
+    let input = inputs[k];
+    delete input.subs[s];
+    inputs[k] = input;
+    config.CampaignDetails.Inputs = inputs;
+})
+
 const handleOptsKeyUpdate = ((e, key, input, i) => {
-    input.options[i].label = e.target.value;
+    let val = e.target.value;
+    input.options[i].label = val;
     inputs[key] = input;
     config.CampaignDetails.Inputs = inputs;
 })
@@ -52,19 +69,87 @@ const handleOptsValueUpdate = ((e, key, input, index) => {
     config.CampaignDetails.Inputs = inputs;
  })
 
+ const addNewOption = ((key) => {
+     let input = inputs[key];
+     input.options[input.options.length++] = {
+         "label": "new option", 
+         "value": ""
+     }
+     inputs[key] = input;
+     config.CampaignDetails.Inputs = inputs; 
+ })
+
+const handleTypeChange = ((e, key) => {
+    let input = inputs[key];
+    let choosenType = e.target.value;
+    switch (choosenType) {
+        case "input": {
+            delete input.options;
+            input.subs = {};
+            break;
+        }
+        case "select": {
+            delete input.subs;
+            input.options = [{
+                "label": "",
+                "value": ""
+            }]
+            break;
+        }
+        case "date": {
+            delete input.options;
+            delete input.subs;
+            break;
+        }
+    }
+    input.type = choosenType;
+    inputs[key] = input;
+    config.CampaignDetails.Inputs = inputs;
+})
+
+const removeInput = ((key) => {
+    delete inputs[key];
+    config.CampaignDetails.Inputs = inputs;
+    window.eapi.updateConfig(config)
+			.then(updated => console.log(`Configuration was updated: ${updated}`));
+})
+
+const addNewInput = (() => {
+    inputs["newDimension"] = 
+        {
+            "label": "",
+            "placeholder": "",
+            "index": 0,
+            "type": "select",
+            "tooltip": "",
+            "subs": {
+                "Item 1A": "I1A",
+                "Item 1B": "I1B",
+                "Item 1C": "I1C"
+            } 
+        }
+})
+
+const removeOption = ((k, i) => {
+    inputs[k].options.splice(i, 1);
+    config.CampaignDetails.Inputs = inputs;
+})
+
 // May convert to utility function
 const debounceWrapper = function(timer, cb, time) {
     clearTimeout(timer);
     cb();
     updateDebounce = setTimeout(() => {
+        window.eapi.sortConfig(config);
+
+        // TODO: Figure out redraw while updating index
+        inputs = config.CampaignDetails.Inputs;
         window.eapi.updateConfig(config)
-			.then(updated => console.log(`Configuration was updated: ${updated}`));
+			.then(updated => { 
+                console.log(`Configuration was updated: ${updated}`)
+            });
     }, time)   
 }
-
-const handleTypeChange = (() => {
-
-})
 
 // Using to simplify handler logic
 const debounceAndUpdate = (handler) => {
@@ -76,44 +161,31 @@ const debounceAndUpdate = (handler) => {
 {#await initalization}
     <div>Loading...</div>
 {:then}
-    <div>Loaded</div>
     {#each Object.keys(config.CampaignDetails.Inputs) as key}
         <fieldset>
-            <!-- 
-                "dataPointA": {
-                    "label": "Data Point A",
-                    "placeholder": "Data Point A",
-                    "index": 2,
-                    "type": "input",
-                    "subs": {
-                        "Item 1A": "I1A",
-                        "Item 1B": "I1B",
-                        "Item 1C": "I1C"
-                    },
-                    "value": "Item 1D"
-                },
-            -->
             <Input 
-                label="Key"
+                label="key"
                 name="{key}" 
                 placeholder="{key}" 
-                on:input={(e) => debounceAndUpdate(() => handleInputUpdate(e, key, inputs[key]))} 
+                on:change={(e) => { debounceAndUpdate(() => handleInputUpdate(e, key, inputs[key]))}}
                 value={key}
             />
             {#each Object.keys(inputs[key]) as subkey}
                 {#if subkey === "options"}
                     Options: 
-                    {#each inputs[key].options as option, i}
-                        <div>
-                            <input name={`${option.value}-label`} value={option.label} on:input={(e) =>  debounceAndUpdate(() => handleOptsKeyUpdate(e, key, inputs[key], i))}/>
-                            <input name={`${option.value}-value`} value={option.value} on:input={(e) => debounceAndUpdate(() => handleOptsValueUpdate(e, key, inputs[key], i))}/>
-                        </div>
-                    {/each}
+                    <div class="option-listing">
+                        {#each inputs[key].options as option, i}
+                            <input value={option.label} on:input={(e) =>  debounceAndUpdate(() => handleOptsKeyUpdate(e, key, inputs[key], i))}/>
+                            <input value={option.value} on:input={(e) => debounceAndUpdate(() => handleOptsValueUpdate(e, key, inputs[key], i))}/>
+                            <button class="btn-remove__option" on:click={(e) => debounceAndUpdate(() => removeOption(key, i))}>-</button>
+                        {/each}
+                    </div>
+                    <button class="btn-add" on:click={(e) => { addNewOption(key) }}>Add Option</button>
                 {:else if subkey === "type"}
                         <Select 
                             label="{subkey}" 
                             name="{key}-{subkey}" 
-                            on:input={(e) => handleTypeChange(e, inputs[key])} 
+                            on:input={(e) => debounceAndUpdate(() => handleTypeChange(e, key))} 
                             options={[
                                 {
                                     "label": "Select", 
@@ -133,26 +205,63 @@ const debounceAndUpdate = (handler) => {
                 {:else if subkey === "value"}
                     Value is: ${inputs[key][subkey]}
                 {:else if subkey === "subs"}
-                    Substituations: 
+                    Substitutions: 
                     {#each Object.entries(inputs[key].subs) as sub}
-                        <div>
-                            <input name={`${sub[0]}-label`} value={sub[0]} on:input={(e) => debounceAndUpdate(() => handleSubsKeyUpdate(e, key, inputs[key], sub[0]))} />
-                            <input name={`${sub[0]}-value`} value={sub[1]} on:input={(e) => debounceAndUpdate(() => handleSubsValueUpdate(e, key, inputs[key], sub[0]))} />
+                        <div class="option-listing">
+                            <input value={sub[0]} on:change={(e) => debounceAndUpdate(() => handleSubsKeyUpdate(e, key, inputs[key], sub[0]))} />
+                            <input value={sub[1]} on:input={(e) => debounceAndUpdate(() => handleSubsValueUpdate(e, key, inputs[key], sub[0]))} />
+                            <button class="btn-remove__sub" on:click={(e) => debounceAndUpdate(() => removeSub(key, sub[0]))}>-</button>
                         </div>
                     {/each}
+                    <button class="btn-add" on:click={(e) => { addNewSub(key) }}>Add Substitution</button>
                 {:else}
                     <Input 
                         label="{subkey}"
-                        name="{key}-{subkey}" 
+                        name="{key}-{subkey}"
+                        type={subkey === "index" ? "number" : "text"} 
                         on:input={(e) => debounceAndUpdate(() => handleFieldUpdate(e, key, subkey))} 
                         value={inputs[key][subkey]}
                     />
                 {/if}
             {/each}
+            <button class="btn-remove" on:click={() => removeInput(key)}>Remove</button>
         </fieldset>
     {/each}
+    <Select 
+        label="Type to Add" 
+        options={[
+            {
+                "label": "Select", 
+                "value": "select"
+            },
+            {
+                "label": "Input", 
+                "value": "input"
+            },
+            {
+                "label": "Date", 
+                "value": "date"
+            }
+        ]}
+        bind:value={typeToAdd}
+    />
+    <button class="btn-add" on:click={() => addNewInput()}>Add New Dimension</button>
 {/await}
 
 <style>
+.btn-remove {
+    width: 100%;
+    background-color: red;
+}
 
+.btn-add {
+    width: 100%;
+    background-color: lightgray;
+    color: slategray;
+}
+
+.option-listing {
+    display: grid;
+    grid-template-columns: 3fr 3fr 1fr;
+}
 </style>

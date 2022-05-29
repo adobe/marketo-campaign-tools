@@ -4,6 +4,12 @@
 	import Configuration from './routes/Configuration.svelte';
 
 	let page = CampaignName;
+
+	// TODO: Set last page handling across app
+	if (sessionStorage.getItem("lastPage") === "Dimensions") {
+		page = Configuration;
+	}
+	
 </script>
 
 <div class="menu-container">

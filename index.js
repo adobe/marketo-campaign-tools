@@ -4,7 +4,6 @@ const os = require('os');
 const fs = require('fs/promises');
 const { constants, createWriteStream } = require('fs');
 const { format } = require('@fast-csv/format');
-const http = require('http');
 
 let userConfigPath = path.join(os.homedir(),".marketo-toolkit");
 
@@ -45,6 +44,8 @@ const updateConfiguration = async (config) => {
         console.log(`Local configuration file method was called without a configuration`);
     }
 
+    sortConfigInputs(config);
+
     let toolkitConfigPath = config.configurationPath;
     let err = await fs.writeFile(toolkitConfigPath, JSON.stringify(config), 'utf-8');
     if (err !== undefined) {
@@ -53,6 +54,10 @@ const updateConfiguration = async (config) => {
     } else {
         return true;
     }
+}
+
+const sortConfigInputs = (config) => {
+    config.CampaignDetails.Inputs = Object.fromEntries(Object.entries(config.CampaignDetails.Inputs).sort(([,a],[,b]) => a.index - b.index))
 }
    
 
@@ -88,7 +93,7 @@ const createWindow = () => {
 
     const mainWindow = new BrowserWindow({
         width: parseInt(width * 0.7),
-        height: parseInt(height * 0.6),
+        height: parseInt(height * 0.8),
         webPreferences: {
             preload: path.join(__dirname, 'preload.js')
         }

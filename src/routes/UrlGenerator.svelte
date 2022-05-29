@@ -48,6 +48,27 @@
 		entries[nextIndex.toString()] = {index: nextIndex };
 	}
 
+	const removeRow = (index) => {
+		delete entries[index.toString()];
+		let sortedEntries =	Object.entries(entries).sort((a, b) => {
+			a.index - b.index;
+		})
+		let sortedEntriesObject = {};
+		let i = 1;
+		sortedEntries.forEach((e) => {
+			e[1].index = i;
+			sortedEntriesObject[i.toString()] = e[1];
+			i++;
+		})
+		
+		entries = sortedEntriesObject;
+		conf.UrlBuilder.entries = entries;
+
+		updateTimer = setTimeout(() => {
+			saveConfig(conf);
+		}, 500)
+	}
+
 	let updateTimer;
 	const urlUpdated = (e) => {
 		
@@ -95,7 +116,7 @@
 			</div>
 			<div class="url-listings__section inputs">
 				{#each Object.values(entries) as {index, values}}
-				<div>{index}</div>
+				<div class="url-index">{index}</div>
 					<UrlGroup entryKey={index} prefix={conf.UrlBuilder?.prefix} inputs={builderFields} values={values} on:urlUpdated={urlUpdated}></UrlGroup>
 				{/each}
 				<div>
@@ -104,7 +125,8 @@
 			</div>
 			<div class="url-listings__section outputs">
 				{#each Object.values(entries) as { index, url }}
-					<div>{index}</div>
+					<button on:click={(e) => { removeRow(index) }}>-</button>
+					<div class="url-index">{index}</div>
 					<input type="text" disable class="url-output" value="{url}" />
 				{/each}
 			</div>
@@ -135,6 +157,10 @@
 	}	
 
 	.url-listings__section.outputs {
-		grid-template-columns: 1fr 14fr;
+		grid-template-columns: 1fr 1fr 13fr;
+	}
+
+	.url-index {
+		text-align: center;
 	}
 </style>
