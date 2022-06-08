@@ -16,8 +16,6 @@ const init = async() => {
 
 let initalization = init();
 
-let updateDebounce;
-
 const handleInputUpdate = ((e, key, input) => {
     delete config.CampaignDetails.Inputs[key]            
     config.CampaignDetails.Inputs[e.target.value] = input;
@@ -29,6 +27,7 @@ const handleFieldUpdate = ((e, key, field) => {
     inputs = config.CampaignDetails.Inputs;
 })
 
+// ----- Substitution Handling ----- 
 const handleSubsKeyUpdate = ((e, key, input, sub) => {
     input.subs[e.target.value] = input.subs[sub];
     delete input.subs[sub];
@@ -56,6 +55,8 @@ const removeSub = ((k, s) => {
     config.CampaignDetails.Inputs = inputs;
 })
 
+// ----- Options Handling -----
+
 const handleOptsKeyUpdate = ((e, key, input, i) => {
     let val = e.target.value;
     input.options[i].label = val;
@@ -70,14 +71,20 @@ const handleOptsValueUpdate = ((e, key, input, index) => {
  })
 
  const addNewOption = ((key) => {
-     let input = inputs[key];
-     input.options[input.options.length++] = {
-         "label": "new option", 
-         "value": ""
-     }
-     inputs[key] = input;
-     config.CampaignDetails.Inputs = inputs; 
- })
+    let input = inputs[key];
+    input.options[input.options.length++] = {
+        "label": "new option", 
+        "value": ""
+    }
+    inputs[key] = input;
+    config.CampaignDetails.Inputs = inputs; 
+})
+    
+const removeOption = ((k, i) => {
+    inputs[k].options.splice(i, 1);
+    config.CampaignDetails.Inputs = inputs;
+})
+// ----- Type Changes Handling -----
 
 const handleTypeChange = ((e, key) => {
     let input = inputs[key];
@@ -130,10 +137,8 @@ const addNewInput = (() => {
         }
 })
 
-const removeOption = ((k, i) => {
-    inputs[k].options.splice(i, 1);
-    config.CampaignDetails.Inputs = inputs;
-})
+
+let updateDebounce;
 
 // May convert to utility function
 const debounceWrapper = function(timer, cb, time) {
@@ -249,19 +254,19 @@ const debounceAndUpdate = (handler) => {
 {/await}
 
 <style>
-.btn-remove {
-    width: 100%;
-    background-color: red;
-}
+    .btn-remove {
+        width: 100%;
+        background-color: red;
+    }
 
-.btn-add {
-    width: 100%;
-    background-color: lightgray;
-    color: slategray;
-}
+    .btn-add {
+        width: 100%;
+        background-color: lightgray;
+        color: slategray;
+    }
 
-.option-listing {
-    display: grid;
-    grid-template-columns: 3fr 3fr 1fr;
-}
+    .option-listing {
+        display: grid;
+        grid-template-columns: 3fr 3fr 1fr;
+    }
 </style>

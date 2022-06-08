@@ -1,5 +1,5 @@
 <script>
-	import Channels from './configurations/Channels.svelte';
+	import Parameters from './configurations/Parameters.svelte';
     import Dimensions from './configurations/Dimensions.svelte';
     import Upload from './configurations/Upload.svelte';
 
@@ -8,13 +8,13 @@
 <h1>Configuration</h1>
 <div class='config-container'>
     <menu>
-        <li on:click={() => selectedConfiguration = Channels}>
-            Channels
+        <li on:click={() => selectedConfiguration = Parameters} class:selected="{selectedConfiguration == Parameters}">
+            Parameters
         </li>
-        <li on:click={() => selectedConfiguration = Dimensions}>
+        <li on:click={() => selectedConfiguration = Dimensions} class:selected="{selectedConfiguration == Dimensions}">
             Dimensions
         </li>
-        <li on:click={() => selectedConfiguration = Upload}>
+        <li on:click={() => selectedConfiguration = Upload} class:selected="{selectedConfiguration == Upload}">
             Upload
         </li>
     </menu>
@@ -54,5 +54,10 @@
         width: 90%;
         padding: 1rem 0 1rem 10%;
         background-color: lightblue;
+    }
+
+    .selected {
+        font-weight: bold;
+        border: 1px solid grey;
     }
 </style>
