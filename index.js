@@ -46,8 +46,7 @@ const updateConfiguration = async (config) => {
 
     sortConfigInputs(config);
 
-    let toolkitConfigPath = config.configurationPath;
-    let err = await fs.writeFile(toolkitConfigPath, JSON.stringify(config), 'utf-8');
+    let err = await fs.writeFile(config.configurationPath, JSON.stringify(config), 'utf-8');
     if (err !== undefined) {
         console.error(err);
         return false;
@@ -56,24 +55,42 @@ const updateConfiguration = async (config) => {
     }
 }
 
+// TODO: Let this logic be on the client-side
 const sortConfigInputs = (config) => {
     config.CampaignDetails.Inputs = Object.fromEntries(Object.entries(config.CampaignDetails.Inputs).sort(([,a],[,b]) => a.index - b.index))
 }
    
 
 const openUserConfig = () => {
-    const { O_RDONLY } = constants;
-
     return fs.readFile(userConfigPath, 'utf-8');
 }
 
 // TODO: Test this against empty configruations (local user and toolkit level)
-const loadConfiguration = async (func) => {
-    let contents = await openUserConfig();
+const loadConfiguration = async (fn) => {
+
+    let contents;
+    try {
+        contents = await openUserConfig(); 
+    } catch (err) {
+        console.log(`Error while attempting to retrieve configuration, creating default`);
+
+        let defaultContents = await fs.readFile(path.join(__dirname, "defaultConfig.json"), "utf-8");
+        let defaultConfigContents = JSON.parse(defaultContents);
+        userConfigPath = path.join(os.homedir(),".marketo-toolkit-config");
+        
+        fs.writeFile(userConfigPath, JSON.stringify(defaultConfigContents), 'utf-8', (err, data) => {
+            createLocalConfig({configPath: userConfigPath, updated: new Date()});
+            fs.readFile(userConfigPath, 'utf-8')
+                .then(content => {
+                    contents = content;
+                })
+                .catch(err => console.log(err)
+                )
+        });         
+    }
     let conf = JSON.parse(contents);
     let fh = await fs.open(conf.configPath);
     let fileContents = await fh.readFile("utf-8"); 
-
     let configJson = JSON.parse(fileContents);
     Object.assign(configJson, 
         {
@@ -81,8 +98,9 @@ const loadConfiguration = async (func) => {
             "configurationPath" : conf.configPath
         }
     );
-    func(configJson);
+
     fh.close();
+    fn(configJson);
 }
 
 const createWindow = () => {
