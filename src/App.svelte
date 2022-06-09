@@ -18,11 +18,6 @@
 	let page = CampaignName;
 	let showConfig;
 
-	// TODO: Set last page handling across app
-	if (sessionStorage.getItem("lastPage") === "Dimensions") {
-		page = Configuration;
-	}
-
 	const revealConfig = () => {
 		if (page == Parameters || page == Dimensions || page == Upload) {
 			showConfig = true;
@@ -88,11 +83,11 @@
 		<li on:click="{() => revealConfig()}" class="configuration-list-item">
 			Configure
 			<menu class="configuration-menu" class:hide="{!showConfig}">
-				<li on:click={() => setPage(Parameters)} class:selected="{page == Parameters}">
-					<Icon component={Puzzle} />Parameters
-				</li>
 				<li on:click={() => setPage(Dimensions)} class:selected="{page == Dimensions}">
 					<Icon component={Dimension} />Dimensions
+				</li>
+				<li on:click={() => setPage(Parameters)} class:selected="{page == Parameters}">
+					<Icon component={Puzzle} />Parameters
 				</li>
 				<li on:click={() => setPage(Upload)} class:selected="{page == Upload}">
 					<Icon component={FileUpload} />Upload
@@ -115,7 +110,6 @@
         padding-left: 1rem;
         width: calc(100% - 1rem);
         height: fit-content;
-		border-right: 2px solid lightgray;
 	}
 
 	li {

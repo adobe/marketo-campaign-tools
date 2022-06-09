@@ -122,19 +122,32 @@ const removeInput = ((key) => {
 })
 
 const addNewInput = (() => {
-    inputs["newDimension"] = 
-        {
-            "label": "",
-            "placeholder": "",
-            "index": 0,
-            "type": "select",
-            "tooltip": "",
-            "subs": {
-                "Item 1A": "I1A",
-                "Item 1B": "I1B",
-                "Item 1C": "I1C"
-            } 
-        }
+     let input =  {
+        "label": "",
+        "placeholder": "",
+        "index": 0,
+        "tooltip": "" 
+    }
+
+    switch (typeToAdd) {
+        case "input": 
+            input.subs = {"sub1":"val1"}
+            input.type = "input";
+            break;
+        case "select": 
+            input.options = [{
+                "label": "Option 1", 
+                "value": "Value 1"
+            }]
+            input.type = "select";
+            break;
+        case "date": 
+            input.type = "date";
+            break;
+
+    }
+    
+    inputs["newDimension"] = input;
 })
 
 
