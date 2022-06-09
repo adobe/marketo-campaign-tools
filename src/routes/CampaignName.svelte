@@ -1,10 +1,11 @@
 <script>
+	import { createEventDispatcher } from 'svelte';
 	import Input from '../form/Input.svelte';
 	import TextArea from '../form/Textarea.svelte';
-	import Counter from '../form/Counter.svelte';
 	import Select from '../form/Select.svelte'; 
 	import Date from '../form/Date.svelte';
-
+	
+	
 	let urlComponents = new Map();
 	let indices = new Set();
 	let cName = '';
@@ -82,6 +83,7 @@
 		updateUrl();
 	}
 	
+	const dispatch = new createEventDispatcher();
 	let updateTimer;
 	const updateUrl = () => {
 		
@@ -104,6 +106,8 @@
 		
 		config.CampaignDetails.name = cName;
 		config.CampaignDetails.Inputs = inputs;
+
+		dispatch('nameChange', { cname: cName });
 
 		updateTimer = setTimeout(() => {
 			saveConfig(config);

@@ -7,6 +7,14 @@
     import Dimensions from './routes/configurations/Dimensions.svelte';
     import Upload from './routes/configurations/Upload.svelte';
 
+	// Import icons
+	import Icon from './icons/Icon.svelte';
+	import Link from './icons/link.svelte';
+	import Puzzle from './icons/puzzle.svelte';
+	import Dimension from './icons/dimensions.svelte';
+	import FileUpload from './icons/file-upload.svelte';
+	import FormTable from './icons/form-table.svelte';
+
 	let page = CampaignName;
 	let showConfig;
 
@@ -22,36 +30,77 @@
 			showConfig = !showConfig;
 		}
 	}
+
+	// Initial configuration to get Campaign Name;
+	let campaignName;
+	async function init() {
+		let config = await window.eapi.getConfig();
+		campaignName = config.CampaignDetails.name;
+	}
+	let initalization = init();
+
+	const updateName = (e) => {
+		campaignName = e.detail.cname;
+	}
+
+	// Page Name Logic
+	let pageName;
+	const setPage = (comp) => {
+		page = comp;
+		switch (comp) {
+			case CampaignName: 
+				pageName = "Campaign Name";
+				break;
+			case UrlGenerator: 
+				pageName = "URL Builder";
+				break;
+			case Parameters: 
+				pageName = "Parameters";
+				break;
+			case Dimensions: 
+				pageName = "Dimensions";
+				break;
+			case Upload: 
+				pageName = "Import";
+				break;
+			default:
+				pageName = "No Page";
+			}
+	}
+
+	setPage(page);
 	
 </script>
 
 <div class="header">
-	Header
+	<div>logo</div>
+	<div>{#await initalization} No Name {:then} {campaignName} {/await}</div> 
+	<div>{pageName}</div>
 </div>
 <div class="wrapper">
 	<menu>
-		<li on:click="{() => page = CampaignName}">
-			Campaign Name
+		<li on:click="{() => setPage(CampaignName)}">
+			<Icon component={FormTable} />Campaign Name
 		</li>
-		<li on:click="{() => page = UrlGenerator}">
-			URL
+		<li on:click="{() => setPage(UrlGenerator)}">
+			<Icon component={Link} />URL
 		</li>
-		<li on:click="{() => revealConfig()}">
+		<li on:click="{() => revealConfig()}" class="configuration-list-item">
 			Configure
 			<menu class="configuration-menu" class:hide="{!showConfig}">
-				<li on:click={() => page = Parameters} class:selected="{page == Parameters}">
-					Parameters
+				<li on:click={() => setPage(Parameters)} class:selected="{page == Parameters}">
+					<Icon component={Puzzle} />Parameters
 				</li>
-				<li on:click={() => page = Dimensions} class:selected="{page == Dimensions}">
-					Dimensions
+				<li on:click={() => setPage(Dimensions)} class:selected="{page == Dimensions}">
+					<Icon component={Dimension} />Dimensions
 				</li>
-				<li on:click={() => page = Upload} class:selected="{page == Upload}">
-					Upload
+				<li on:click={() => setPage(Upload)} class:selected="{page == Upload}">
+					<Icon component={FileUpload} />Upload
 				</li>
 			</menu>
 		</li>
 	</menu>
-	<svelte:component this={page} />
+	<svelte:component this={page} on:nameChange={updateName} />
 </div>
 
 <style>
@@ -64,7 +113,7 @@
 	menu {
         margin-left: 0;
         padding-left: 1rem;
-        width: 100%;
+        width: calc(100% - 1rem);
         height: fit-content;
 		border-right: 2px solid lightgray;
 	}
@@ -73,17 +122,48 @@
 		height: 100%;
 		list-style-type: none;
 		padding: 0.5rem 0;
+		display: grid;
+		grid-template-columns: 2rem 1fr;
+		column-gap: 1rem;
+		align-items: center;
+	}
+
+	.configuration-list-item {
+		align-items: start;
+		grid-template-columns: 1fr;
 	}
 
 	.configuration-menu {
-		border: none;
-		width: 90%;
-		margin-left: 10%;
-		z-index: 500;
-	}
+		padding-left: 0;
+		background-color: darkgray
+	}	
 
 	.hide {
 		display:none;
+	}
+
+	.header {
+		display: grid;
+		grid-template-columns: 1fr 3fr 1fr;
+		margin-bottom: 1rem;
+		padding-left: 2rem;
+		background-color: #fff;
+		border-bottom: 1px solid #eaeaea;
+		height: 3rem;
+		align-items: center;
+	}
+
+	.header :first-child {
+		text-align: left;
+	}
+
+	.header :nth-child(2) {
+		text-align: center;
+	}
+
+	.header :last-child {
+		text-align:right;
+		padding-right: 1rem;
 	}
 
 	/** Global Styles */
@@ -98,17 +178,6 @@
 		border: 1px solid #eaeaea;
 		border-radius: 4px;
 		margin-right: 1rem;
-	}
-
-	:global(.header) {
-		display: grid;
-		grid-template-columns: 1fr;
-		margin-bottom: 1rem;
-		padding-left: 2rem;
-		background-color: #fff;
-		border-bottom: 1px solid #eaeaea;
-		height: 3rem;
-		align-items: center;
 	}
 
 	:global(.cmp-input) {

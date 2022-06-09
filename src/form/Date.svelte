@@ -1,6 +1,4 @@
 <script>
-    import { createEventDispatcher } from 'svelte';
-
     export let name;
     export let label;
     export let index;
