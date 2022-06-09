@@ -154,25 +154,12 @@
 				/>
 			{/if}
 		{/each}
-	
 
 		<!-- This area is for output only  -->
 		<TextArea name="generatedUrl" text={cName} placeholder="Campaign name will appear here" />
-		<Counter label={"Number of characters!:"} count={cName.length} />
 	{/await}
 </main>
 
 <style>
-	main {
-		text-align: center;
-		padding: 1em;
-		max-width: 240px;
-		margin: 0 auto;
-	}
 
-	@media (min-width: 640px) {
-		main {
-			max-width: none;
-		}
-	}
 </style>

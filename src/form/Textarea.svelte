@@ -1,25 +1,24 @@
 <script>
+    import Counter from "./Counter.svelte";
+
     export let name;
     export let text = "Output";
 </script>
 
-<div>
+<div class="cmp-input">
     <h2>Campaign Name</h2>
-    <textarea {name} placeholder="Enter data to start creating URL" rows="3" cols="100" disabled >{text}</textarea>
+    <div>
+        <textarea {name} placeholder="Enter data to start creating URL" rows="3" disabled >{text}</textarea>
+        <Counter label={"Current count:"} count={text.length} />
+    </div>
+    
 </div>
 
 <style>
-    div {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
     textarea {
-        flex-grow: 1;
+        width: 100%;
+        max-width: 100%;;
         margin-top: 1em;
-        margin-bottom: 1em;
-    }
-    h2 {
-        margin-right: 1rem;
+        margin-bottom: 0;
     }
 </style>

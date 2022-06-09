@@ -162,96 +162,98 @@ const debounceAndUpdate = (handler) => {
 }
 
 </script>
-<h1>Dimensions</h1>
-{#await initalization}
-    <div>Loading...</div>
-{:then}
-    {#each Object.keys(config.CampaignDetails.Inputs) as key}
-        <fieldset>
-            <Input 
-                label="key"
-                name="{key}" 
-                placeholder="{key}" 
-                on:change={(e) => { debounceAndUpdate(() => handleInputUpdate(e, key, inputs[key]))}}
-                value={key}
-            />
-            {#each Object.keys(inputs[key]) as subkey}
-                {#if subkey === "options"}
-                    Options: 
-                    <div class="option-listing">
-                        {#each inputs[key].options as option, i}
-                            <input value={option.label} on:input={(e) =>  debounceAndUpdate(() => handleOptsKeyUpdate(e, key, inputs[key], i))}/>
-                            <input value={option.value} on:input={(e) => debounceAndUpdate(() => handleOptsValueUpdate(e, key, inputs[key], i))}/>
-                            <button class="btn-remove__option" on:click={(e) => debounceAndUpdate(() => removeOption(key, i))}>-</button>
+<main>
+    <h1>Dimensions</h1>
+    {#await initalization}
+        <div>Loading...</div>
+    {:then}
+        {#each Object.keys(config.CampaignDetails.Inputs) as key}
+            <fieldset>
+                <Input 
+                    label="key"
+                    name="{key}" 
+                    placeholder="{key}" 
+                    on:change={(e) => { debounceAndUpdate(() => handleInputUpdate(e, key, inputs[key]))}}
+                    value={key}
+                />
+                {#each Object.keys(inputs[key]) as subkey}
+                    {#if subkey === "options"}
+                        Options: 
+                        <div class="option-listing">
+                            {#each inputs[key].options as option, i}
+                                <input value={option.label} on:input={(e) =>  debounceAndUpdate(() => handleOptsKeyUpdate(e, key, inputs[key], i))}/>
+                                <input value={option.value} on:input={(e) => debounceAndUpdate(() => handleOptsValueUpdate(e, key, inputs[key], i))}/>
+                                <button class="btn-remove__option" on:click={(e) => debounceAndUpdate(() => removeOption(key, i))}>-</button>
+                            {/each}
+                        </div>
+                        <button class="btn-add" on:click={(e) => { addNewOption(key) }}>Add Option</button>
+                    {:else if subkey === "type"}
+                            <Select 
+                                label="{subkey}" 
+                                name="{key}-{subkey}" 
+                                on:input={(e) => debounceAndUpdate(() => handleTypeChange(e, key))} 
+                                options={[
+                                    {
+                                        "label": "Select", 
+                                        "value": "select"
+                                    },
+                                    {
+                                        "label": "Input", 
+                                        "value": "input"
+                                    },
+                                    {
+                                        "label": "Date", 
+                                        "value": "date"
+                                    }
+                                ]}
+                                value={inputs[key][subkey]}
+                            />
+                    {:else if subkey === "value"}
+                        Value is: ${inputs[key][subkey]}
+                    {:else if subkey === "subs"}
+                        Substitutions: 
+                        {#each Object.entries(inputs[key].subs) as sub}
+                            <div class="option-listing">
+                                <input value={sub[0]} on:change={(e) => debounceAndUpdate(() => handleSubsKeyUpdate(e, key, inputs[key], sub[0]))} />
+                                <input value={sub[1]} on:input={(e) => debounceAndUpdate(() => handleSubsValueUpdate(e, key, inputs[key], sub[0]))} />
+                                <button class="btn-remove__sub" on:click={(e) => debounceAndUpdate(() => removeSub(key, sub[0]))}>-</button>
+                            </div>
                         {/each}
-                    </div>
-                    <button class="btn-add" on:click={(e) => { addNewOption(key) }}>Add Option</button>
-                {:else if subkey === "type"}
-                        <Select 
-                            label="{subkey}" 
-                            name="{key}-{subkey}" 
-                            on:input={(e) => debounceAndUpdate(() => handleTypeChange(e, key))} 
-                            options={[
-                                {
-                                    "label": "Select", 
-                                    "value": "select"
-                                },
-                                {
-                                    "label": "Input", 
-                                    "value": "input"
-                                },
-                                {
-                                    "label": "Date", 
-                                    "value": "date"
-                                }
-                            ]}
+                        <button class="btn-add" on:click={(e) => { addNewSub(key) }}>Add Substitution</button>
+                    {:else}
+                        <Input 
+                            label="{subkey}"
+                            name="{key}-{subkey}"
+                            type={subkey === "index" ? "number" : "text"} 
+                            on:input={(e) => debounceAndUpdate(() => handleFieldUpdate(e, key, subkey))} 
                             value={inputs[key][subkey]}
                         />
-                {:else if subkey === "value"}
-                    Value is: ${inputs[key][subkey]}
-                {:else if subkey === "subs"}
-                    Substitutions: 
-                    {#each Object.entries(inputs[key].subs) as sub}
-                        <div class="option-listing">
-                            <input value={sub[0]} on:change={(e) => debounceAndUpdate(() => handleSubsKeyUpdate(e, key, inputs[key], sub[0]))} />
-                            <input value={sub[1]} on:input={(e) => debounceAndUpdate(() => handleSubsValueUpdate(e, key, inputs[key], sub[0]))} />
-                            <button class="btn-remove__sub" on:click={(e) => debounceAndUpdate(() => removeSub(key, sub[0]))}>-</button>
-                        </div>
-                    {/each}
-                    <button class="btn-add" on:click={(e) => { addNewSub(key) }}>Add Substitution</button>
-                {:else}
-                    <Input 
-                        label="{subkey}"
-                        name="{key}-{subkey}"
-                        type={subkey === "index" ? "number" : "text"} 
-                        on:input={(e) => debounceAndUpdate(() => handleFieldUpdate(e, key, subkey))} 
-                        value={inputs[key][subkey]}
-                    />
-                {/if}
-            {/each}
-            <button class="btn-remove" on:click={() => removeInput(key)}>Remove</button>
-        </fieldset>
-    {/each}
-    <Select 
-        label="Type to Add" 
-        options={[
-            {
-                "label": "Select", 
-                "value": "select"
-            },
-            {
-                "label": "Input", 
-                "value": "input"
-            },
-            {
-                "label": "Date", 
-                "value": "date"
-            }
-        ]}
-        bind:value={typeToAdd}
-    />
-    <button class="btn-add" on:click={() => addNewInput()}>Add New Dimension</button>
-{/await}
+                    {/if}
+                {/each}
+                <button class="btn-remove" on:click={() => removeInput(key)}>Remove</button>
+            </fieldset>
+        {/each}
+        <Select 
+            label="Type to Add" 
+            options={[
+                {
+                    "label": "Select", 
+                    "value": "select"
+                },
+                {
+                    "label": "Input", 
+                    "value": "input"
+                },
+                {
+                    "label": "Date", 
+                    "value": "date"
+                }
+            ]}
+            bind:value={typeToAdd}
+        />
+        <button class="btn-add" on:click={() => addNewInput()}>Add New Dimension</button>
+    {/await}
+</main>
 
 <style>
     .btn-remove {
