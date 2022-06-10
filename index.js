@@ -4,6 +4,7 @@ const os = require('os');
 const fs = require('fs/promises');
 const { constants, createWriteStream } = require('fs');
 const { format } = require('@fast-csv/format');
+const DefaultConfig = require('./defaultConfig');
 
 let userConfigPath = path.join(os.homedir(),".marketo-toolkit");
 
@@ -46,7 +47,7 @@ const updateConfiguration = async (config) => {
 
     sortConfigInputs(config);
 
-    let err = await fs.writeFile(config.configurationPath, JSON.stringify(config), 'utf-8');
+    let err = await fs.writeFile(config.configPath, JSON.stringify(config), 'utf-8');
     if (err !== undefined) {
         console.error(err);
         return false;
@@ -68,38 +69,40 @@ const openUserConfig = () => {
 // TODO: Test this against empty configruations (local user and toolkit level)
 const loadConfiguration = async (fn) => {
 
-    let contents;
+    let configJson;
+    let configPath;
+    let exists = true;
+
     try {
-        contents = await openUserConfig(); 
+        let contents = await openUserConfig(); 
+        let conf = JSON.parse(contents);
+        configPath = conf.configPath;
+        let fh = await fs.open(conf.configPath);
+        let fileContents = await fh.readFile("utf-8"); 
+        configJson = JSON.parse(fileContents);
+        fh.close();
     } catch (err) {
         console.log(`Error while attempting to retrieve configuration, creating default`);
-
-        let defaultContents = await fs.readFile(path.join(__dirname, "defaultConfig.json"), "utf-8");
-        let defaultConfigContents = JSON.parse(defaultContents);
-        userConfigPath = path.join(os.homedir(),".marketo-toolkit-config");
-        
-        fs.writeFile(userConfigPath, JSON.stringify(defaultConfigContents), 'utf-8', (err, data) => {
-            createLocalConfig({configPath: userConfigPath, updated: new Date()});
-            fs.readFile(userConfigPath, 'utf-8')
-                .then(content => {
-                    contents = content;
-                })
-                .catch(err => console.log(err)
-                )
-        });         
+        configJson = DefaultConfig;
+        configPath = path.join(os.homedir(),".marketo-toolkit-configuration");
+        exists = false;
     }
-    let conf = JSON.parse(contents);
-    let fh = await fs.open(conf.configPath);
-    let fileContents = await fh.readFile("utf-8"); 
-    let configJson = JSON.parse(fileContents);
+
     Object.assign(configJson, 
         {
             "userConfigPath" : userConfigPath, 
-            "configurationPath" : conf.configPath
+            "configPath" : configPath
         }
     );
 
-    fh.close();
+    if (!exists) {
+        createLocalConfig({
+            "userConfigPath" : userConfigPath, 
+            "configPath" : configPath
+        });
+        updateConfiguration(configJson);
+    }
+
     fn(configJson);
 }
 
@@ -120,9 +123,6 @@ const createWindow = () => {
     loadConfiguration((contentsJson) => {mainWindow.webContents.send('configuration-loaded',contentsJson)});
     
     mainWindow.loadFile(path.join(__dirname, "public/index.html"));
-    
-    // TODO: Remove after dev (or make optional via arg)
-    mainWindow.webContents.openDevTools()
 };
 
 ipcMain.handle('configuration-updated', async (e, conf) => {

@@ -5,9 +5,9 @@
 
     const init = (async() => {
         config = await window.eapi.getConfig();
-        if (config.configurationPath) {
+        if (config.configPath) {
             console.log("Loaded configuration");
-            files = [config.configurationPath];
+            files = [config.configPath];
         }
         return true
     })
@@ -25,7 +25,6 @@
         <form>
             <input type="file" id="myFile" name="filename" bind:files>
             <button type="button" on:click|preventDefault={setFileToUpload}>Upload</button>    
-            <!-- <button type="button" on:click={showConfigration}>Get Config</button> -->
             <div class="loaded-file">
                 <b>Currently loaded file:</b> {files ? files[0] : "No configuration specified"}
             </div>

@@ -82,13 +82,30 @@
     
     // ----- Add / Remove Parameter Handling -----
     const addNewParameter = () => {
-        inputs["newParameter"] = 
-        {
-            "placeholder": "",
-            "type": typeToAdd,
+        let input =  {
+            "label": "",
             "index": 0,
-            "name": ""
-        } 
+            "tooltip": "" 
+        }
+
+        switch (typeToAdd) {
+            case "input": 
+                input.subs = {"sub1":"val1"}
+                input.type = "input";
+                break;
+            case "select": 
+                input.options = [{
+                    "label": "Option 1", 
+                    "value": "Value 1"
+                }]
+                input.type = "select";
+                break;
+            case "date": 
+                input.type = "date";
+                break;
+        }
+        
+        inputs["newDimension"] = input; 
     }
 
     const removeInput = (key) => {
@@ -107,6 +124,34 @@
     const handleFieldUpdate = ((e, key, field) => {
         config.UrlBuilder.inputs[key][field] = e.target.value;
         inputs = config.UrlBuilder.inputs;
+    })
+
+    // ----- Substitution Handling ----- 
+    const handleSubsKeyUpdate = ((e, key, input, sub) => {
+        input.subs[e.target.value] = input.subs[sub];
+        delete input.subs[sub];
+        inputs[key] = input;
+        config.UrlBuilder.inputs = inputs;
+    })
+
+    const handleSubsValueUpdate = ((e, key, input, sub) => {
+        input.subs[sub] = e.target.value;
+        inputs[key] = input;
+        config.UrlBuilder.inputs = inputs;
+    })
+
+    const addNewSub = ((key) => {
+        let input = inputs[key];
+        input.subs["newSub"] = "";
+        inputs[key] = input;
+        config.UrlBuilder.inputs = inputs;
+    });
+
+    const removeSub = ((k, s) => {
+        let input = inputs[k];
+        delete input.subs[s];
+        inputs[k] = input;
+        config.UrlBuilder.inputs = inputs;
     })
 
     // May convert to utility function
@@ -155,6 +200,16 @@
                             {/each}
                         </div>
                         <button class="btn-add" on:click={(e) => { addNewOption(key) }}>Add Option</button>
+                    {:else if subkey === "subs"}
+                        Substitutions: 
+                        {#each Object.entries(inputs[key].subs) as sub}
+                            <div class="option-listing">
+                                <input value={sub[0]} on:change={(e) => debounceAndUpdate(() => handleSubsKeyUpdate(e, key, inputs[key], sub[0]))} />
+                                <input value={sub[1]} on:input={(e) => debounceAndUpdate(() => handleSubsValueUpdate(e, key, inputs[key], sub[0]))} />
+                                <button class="btn-remove__sub" on:click={(e) => debounceAndUpdate(() => removeSub(key, sub[0]))}>-</button>
+                            </div>
+                        {/each}
+                        <button class="btn-add" on:click={(e) => { addNewSub(key) }}>Add Substitution</button>
                     {:else if subkey === "value"}
                         <!-- Value is: ${inputs[key][subkey]} -->
                     {:else if subkey === "type"}

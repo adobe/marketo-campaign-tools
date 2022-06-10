@@ -6,6 +6,7 @@
 	import Parameters from './routes/configurations/Parameters.svelte';
     import Dimensions from './routes/configurations/Dimensions.svelte';
     import Upload from './routes/configurations/Upload.svelte';
+	import Global from './routes/configurations/Globals.svelte';
 
 	// Import icons
 	import Icon from './icons/Icon.svelte';
@@ -14,12 +15,16 @@
 	import Dimension from './icons/dimensions.svelte';
 	import FileUpload from './icons/file-upload.svelte';
 	import FormTable from './icons/form-table.svelte';
+	import ExperienceCloud from './icons/experienceCloud.svelte';
+	import Earth from './icons/earth.svelte';
 
 	let page = CampaignName;
 	let showConfig;
 
+	let configurationPages = [Parameters, Dimensions, Upload, Global];
+
 	const revealConfig = () => {
-		if (page == Parameters || page == Dimensions || page == Upload) {
+		if (configurationPages.includes(page)) {
 			showConfig = true;
 		} else {
 			showConfig = !showConfig;
@@ -45,9 +50,11 @@
 		switch (comp) {
 			case CampaignName: 
 				pageName = "Campaign Name";
+				showConfig = false;
 				break;
 			case UrlGenerator: 
 				pageName = "URL Builder";
+				showConfig = false;
 				break;
 			case Parameters: 
 				pageName = "Parameters";
@@ -57,6 +64,9 @@
 				break;
 			case Upload: 
 				pageName = "Import";
+				break;
+			case Global:
+				pageName = "Globals";
 				break;
 			default:
 				pageName = "No Page";
@@ -68,7 +78,10 @@
 </script>
 
 <div class="header">
-	<div>logo</div>
+	<div class="logo">
+		<Icon component={ExperienceCloud} size="small" />
+		Marketo Toolkit
+	</div>
 	<div>{#await initalization} No Name {:then} {campaignName} {/await}</div> 
 	<div>{pageName}</div>
 </div>
@@ -89,6 +102,9 @@
 				<li on:click={() => setPage(Parameters)} class:selected="{page == Parameters}">
 					<Icon component={Puzzle} />Parameters
 				</li>
+				<li on:click={() => setPage(Global)} class:selected="{page == Global}">
+					<Icon component={Earth} />Globals
+				</li>
 				<li on:click={() => setPage(Upload)} class:selected="{page == Upload}">
 					<Icon component={FileUpload} />Upload
 				</li>
@@ -99,6 +115,12 @@
 </div>
 
 <style>
+	.logo {
+		display: grid;
+		grid-template-columns: 48px 1fr;
+		align-items: center;
+	}
+
 	.wrapper {
 		display: grid;
 		grid-template-columns: minmax(10rem, 15%) 1fr;
@@ -128,8 +150,8 @@
 	}
 
 	.configuration-menu {
-		padding-left: 0;
-		background-color: darkgray
+		padding-left: 1rem;
+		border-left: 2px solid slategray
 	}	
 
 	.hide {
@@ -158,6 +180,9 @@
 	.header :last-child {
 		text-align:right;
 		padding-right: 1rem;
+		text-transform: uppercase;
+		font-weight: bold;
+		font-size: 0.8em;
 	}
 
 	/** Global Styles */
@@ -172,6 +197,7 @@
 		border: 1px solid #eaeaea;
 		border-radius: 4px;
 		margin-right: 1rem;
+		overflow-y: scroll;
 	}
 
 	:global(.cmp-input) {
@@ -181,6 +207,18 @@
         align-items: center;
         padding: 0 2rem;
 		width: calc(100% - 4rem);
+	}
+
+	:global(.url-parameters .cmp-input) {
+		width: 100%;
+		grid-template-columns: 1fr;
+		padding: 0;
+	}
+
+	:global(fieldset) {
+		border: none;
+		border-bottom: 2px solid red;
+		margin-bottom: 2rem;
 	}
 
 	@media (max-width: 640px) {

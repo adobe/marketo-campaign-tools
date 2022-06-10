@@ -34,11 +34,13 @@
 		};
 
 	let entries = {};
+	let totalColumns;
 	
 	const init = (async () => {
 		conf = await window.eapi.getConfig();
 		builderFields = conf?.UrlBuilder?.inputs || defaultFields;
 		entries = conf?.UrlBuilder?.entries || {};
+		totalColumns = Object.keys(builderFields).length;
 	});		
 	let configurationLoaded = init();
 
@@ -97,48 +99,11 @@
 			.catch(err => console.log(err));
 	}
 </script>
-<main>
-	{#await configurationLoaded}
-		<div>Loading...</div>
-	{:then}
-		<div class="campaign-name">
-			<h2>Campaign Name:</h2> {conf.CampaignDetails.name}
-			<button type="button" on:click={exportEntries}>Export</button>
-		</div>
-
-		<div class="url-listings">
-			<div class="url-listings__headers url-listings__section">
-				<!-- Headers -->
-				<h3>Index</h3>
-				{#each Object.values(builderFields) as {placeholder}}
-					<h3>{placeholder}</h3>
-				{/each}
-			</div>
-			<div class="url-listings__section inputs">
-				{#each Object.values(entries) as {index, values}}
-				<div class="url-index">{index}</div>
-					<UrlGroup entryKey={index} prefix={conf.UrlBuilder?.prefix} inputs={builderFields} values={values} on:urlUpdated={urlUpdated}></UrlGroup>
-				{/each}
-				<div>
-					<button type="button" on:click={addNewRow}>+</button>
-				</div>
-			</div>
-			<div class="url-listings__section outputs">
-				{#each Object.values(entries) as { index, url }}
-					<button on:click={(e) => { removeRow(index) }}>-</button>
-					<div class="url-index">{index}</div>
-					<input type="text" disable class="url-output" value="{url}" />
-				{/each}
-			</div>
-		</div>
-	{/await}
-</main>
 
 <style>
-	.campaign-name {
+	.url-parameters {
 		display: grid;
-		grid-template-columns: 1fr 3fr 1fr;
-		align-items: center;
+		grid-template-columns: 5% repeat(var(--totalColumns),1fr);
 	}
 
 	.url-listings {
@@ -148,15 +113,15 @@
 	}
 	
 	.url-listings__headers > h3 {
-		border: 1px solid grey;
+		border-right: 1px solid grey;
+		padding-left: 0.5rem;
+		display: grid;
+		align-items: center;
+		font-size: 0.9em;
 	}
 
-	.url-listings__section {
-		display: grid;
-		grid-template-columns: 1fr 4fr repeat(5, 2fr);
-	}	
-
 	.url-listings__section.outputs {
+		display: grid;
 		grid-template-columns: 1fr 1fr 13fr;
 	}
 
@@ -164,3 +129,34 @@
 		text-align: center;
 	}
 </style>
+
+<main>
+	{#await configurationLoaded}
+		<div>Loading...</div>
+	{:then}
+		<div class="url-listings">
+			<div class="url-listings__headers url-parameters url-listings__section" style="--totalColumns:{totalColumns}">
+				<!-- Headers -->
+				<h3>Index</h3>
+				{#each Object.values(builderFields) as {label}}
+					<h3>{label}</h3>
+				{/each}
+				{#each Object.values(entries) as {index, values}}
+				<div class="url-index">{index}</div>
+					<UrlGroup entryKey={index} prefix={conf.UrlBuilder?.prefix} inputs={builderFields} values={values} on:urlUpdated={urlUpdated}></UrlGroup>
+				{/each}
+				<div>
+					<button type="button" on:click={addNewRow}>+</button>
+				</div>
+			</div>
+		</div>
+		<div class="url-listings__section outputs">
+			{#each Object.values(entries) as { index, url }}
+				<button on:click={(e) => { removeRow(index) }}>-</button>
+				<div class="url-index">{index}</div>
+				<input type="text" disable class="url-output" value="{url}" />
+			{/each}
+		</div>
+	{/await}
+</main>
+

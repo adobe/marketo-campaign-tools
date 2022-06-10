@@ -1,4 +1,4 @@
-{
+const defaultConfig = {
     "Delimiter": "_",
     "ReplacePattern": {
         "pattern": "\\s",
@@ -51,3 +51,5 @@
         }
     }
 }
+
+module.exports = defaultConfig;

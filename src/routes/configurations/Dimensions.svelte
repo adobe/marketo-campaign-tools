@@ -176,7 +176,6 @@ const debounceAndUpdate = (handler) => {
 
 </script>
 <main>
-    <h1>Dimensions</h1>
     {#await initalization}
         <div>Loading...</div>
     {:then}
@@ -246,42 +245,53 @@ const debounceAndUpdate = (handler) => {
                 <button class="btn-remove" on:click={() => removeInput(key)}>Remove</button>
             </fieldset>
         {/each}
-        <Select 
-            label="Type to Add" 
-            options={[
-                {
-                    "label": "Select", 
-                    "value": "select"
-                },
-                {
-                    "label": "Input", 
-                    "value": "input"
-                },
-                {
-                    "label": "Date", 
-                    "value": "date"
-                }
-            ]}
-            bind:value={typeToAdd}
-        />
-        <button class="btn-add" on:click={() => addNewInput()}>Add New Dimension</button>
+        <div class="add-type">
+            <Select 
+                label="Type to Add" 
+                options={[
+                    {
+                        "label": "Select", 
+                        "value": "select"
+                    },
+                    {
+                        "label": "Input", 
+                        "value": "input"
+                    },
+                    {
+                        "label": "Date", 
+                        "value": "date"
+                    }
+                ]}
+                bind:value={typeToAdd}
+            />
+            <button class="btn-add" on:click={() => addNewInput()}>Add New Dimension</button>
+        </div>
     {/await}
 </main>
 
 <style>
     .btn-remove {
-        width: 100%;
+        width: 25%;
         background-color: red;
+        border-radius: 4px;
+        float:right;
+        color: #fff;
     }
 
     .btn-add {
         width: 100%;
-        background-color: lightgray;
-        color: slategray;
+        background-color: slategray;
+        color: white;
+        border-radius: 4px;
     }
 
     .option-listing {
         display: grid;
         grid-template-columns: 3fr 3fr 1fr;
+    }
+
+    .add-type {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
     }
 </style>

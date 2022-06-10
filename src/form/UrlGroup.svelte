@@ -72,25 +72,29 @@
 {#each Object.keys(inputs) as key }
     {#if inputs[key].type === "select"}
         <Select 
-            name="{key}" placeholder="{inputs[key].placeholder}" 
+            name="{key}" 
+            placeholder="{inputs[key].placeholder}" 
             on:input={(e) => handleChange(e, inputs[key])} 
             options={inputs[key].options} 
             index={inputs[key].index} 
+            tooltip="{inputs[key].tooltip}"
             value={values ? (values[key] || '') : ''}
         />
     {:else if inputs[key].type === "date"}
-            <Date 
-                label="{inputs[key].label}" 
-                name="{key}" 
-                on:change={(e) => handleChange(e, inputs[key])} 
-                index={inputs[key].index} 
-                bind:value={inputs[key].value} />
+        <Date 
+            name="{key}" 
+            on:change={(e) => handleChange(e, inputs[key])} 
+            index={inputs[key].index} 
+            value={inputs[key].value}
+            tooltip="{inputs[key].tooltip}" 
+        />
     {:else}
         <Input 
             name="{key}" 
             placeholder="{inputs[key].placeholder}" 
             on:input={(e) => handleChange(e, inputs[key])} 
             index={inputs[key].index} 
+            tooltip="{inputs[key].tooltip}"
             value={values[key] || ''}
         />
     {/if}

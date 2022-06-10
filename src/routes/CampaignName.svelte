@@ -5,7 +5,9 @@
 	import Select from '../form/Select.svelte'; 
 	import Date from '../form/Date.svelte';
 	
-	
+	// Utilities
+	import { formatDate } from '../lib/utils';
+
 	let urlComponents = new Map();
 	let indices = new Set();
 	let cName = '';
@@ -93,13 +95,22 @@
 		let replacePattern = new RegExp(config.ReplacePattern.pattern, 'g');
 		let replaceSymbol = config.ReplacePattern.symbol;
 		let sorted = Array.from(indices).sort();
-		
-		console.log("URL Components");
-		console.dir(urlComponents)
 
 		cName = '';
 		sorted.forEach(i => {
-			cName += `${getSubstitutions(urlComponents.get(i))}${delimiter}`;
+			let comp = urlComponents.get(i);
+			switch (comp.type) {
+				case "date": 
+					cName += `${formatDate(comp)}${delimiter}`;
+					break;
+				case "input": 
+					cName += `${getSubstitutions(urlComponents.get(i))}${delimiter}`;
+					break;
+				case "select": 
+					cName += `${getSubstitutions(urlComponents.get(i))}${delimiter}`;
+					break;
+			}
+			
 		})
 		cName = cName.replaceAll(replacePattern, replaceSymbol);
 		cName = cName.substring(0, cName.length - 1);
@@ -134,7 +145,9 @@
 			{#if inputs[key].type === "select"}
 				<Select 
 					label="{inputs[key].label}" 
-					name="{key}" placeholder="{inputs[key].placeholder}" 
+					name="{key}" 
+					placeholder="{inputs[key].placeholder}" 
+					tooltip="{inputs[key].tooltip}"
 					on:input={(e) => handleChange(e, inputs[key])} 
 					options={inputs[key].options} 
 					index={inputs[key].index} 
@@ -144,6 +157,7 @@
 				<Date 
 					label="{inputs[key].label}" 
 					name="{key}" 
+					tooltip="{inputs[key].tooltip}"
 					on:change={(e) => handleChange(e, inputs[key])} 
 					index={inputs[key].index} 
 					bind:value={inputs[key].value} />
@@ -151,6 +165,7 @@
 				<Input 
 					label="{inputs[key].label}" 
 					name="{key}" 
+					tooltip="{inputs[key].tooltip}"
 					placeholder="{inputs[key].placeholder}" 
 					on:input={(e) => handleChange(e, inputs[key])} 
 					index={inputs[key].index} 
