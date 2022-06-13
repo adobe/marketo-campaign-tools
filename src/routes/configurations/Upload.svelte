@@ -1,5 +1,6 @@
 <script>
-    
+    import { downloadFile } from '../../lib/utils';
+
     let files;
     let config = {};
 
@@ -25,6 +26,7 @@
         <form>
             <input type="file" id="myFile" name="filename" bind:files>
             <button type="button" on:click|preventDefault={setFileToUpload}>Upload</button>    
+            <a href="{config.configPath}" download={`${config.CampaignDetails.name}-config.json`} target="_blank">Download</a>
             <div class="loaded-file">
                 <b>Currently loaded file:</b> {files ? files[0] : "No configuration specified"}
             </div>

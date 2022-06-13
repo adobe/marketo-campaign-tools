@@ -211,6 +211,7 @@
 
 	:global(.url-parameters .cmp-input) {
 		width: 100%;
+		min-width: 10rem;
 		grid-template-columns: 1fr;
 		padding: 0;
 	}

@@ -3,7 +3,7 @@
     import Select from '../../form/Select.svelte';
 
     let config;
-    let typeToAdd;
+    let typeToAdd = "select";
     let inputs;
 
     const init = async() => {

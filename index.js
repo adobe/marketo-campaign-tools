@@ -7,6 +7,7 @@ const { format } = require('@fast-csv/format');
 const DefaultConfig = require('./defaultConfig');
 
 let userConfigPath = path.join(os.homedir(),".marketo-toolkit");
+let configPath;
 
 const createLocalConfig = (config) => {
     
@@ -70,7 +71,6 @@ const openUserConfig = () => {
 const loadConfiguration = async (fn) => {
 
     let configJson;
-    let configPath;
     let exists = true;
 
     try {
@@ -178,7 +178,9 @@ ipcMain.handle('create-url-exports', async (e, entries, campaignName) => {
     return filePath;
 })
 
-// http.get('/exports')
+ipcMain.handle('create-config-export', async () => {
+    return configPath;
+})
 
 app.whenReady().then(() => {
     createWindow();

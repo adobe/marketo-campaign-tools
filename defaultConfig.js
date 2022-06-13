@@ -9,6 +9,7 @@ const defaultConfig = {
         "Inputs": {
             "campaignDate": {
                 "label": "Campaign Date",
+                "placeholder": "Input Type",
                 "index": 1,
                 "type": "date",
                 "subs": {},
@@ -43,7 +44,7 @@ const defaultConfig = {
         "prefix": "utm_",
         "inputs": {
             "baseUrl": {
-                "placeholder": "Base URL",
+                "label": "Base URL",
                 "type": "input",
                 "index": 0,
                 "name": "baseUrl"

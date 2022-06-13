@@ -11,32 +11,9 @@
 	let urlComponents = new Map();
 	let indices = new Set();
 	let cName = '';
+	let inputs =  {};
 
 	// Establish the first set of campaign details immediately
-	let inputs = {
-		"campaignDate": {
-			"label": "Campaign Date",
-			"index": 9,
-			"type": "date",
-			"subs": {}
-		},
-		"campaignDetails": {
-			"label": "Campaign Details",
-			"placeholder": "Details",
-			"index": 5,
-			"type": "input",
-			"subs": {}
-    	},
-		"campaignType": {
-			"label": "Campaign Type",
-			"placeholder": "Input Type",
-			"index": 6,
-			"type": "input",
-			"subs": {}
-    	},
-	};
-	
-	let delimiter = "_";
 	let config = {};	
 
 	// Get saved details and configurations, initialize page
@@ -45,11 +22,10 @@
 		
 		if (config !== undefined) {
 			Object.assign(inputs, config.CampaignDetails?.Inputs);
-			delimiter = config.Delimiter;	
 		}
 		config.CampaignDetails = config.CampaignDetails || {"name": ""}
 		cName = config.CampaignDetails.name;
-		config.ReplacePattern = config.ReplacePattern || { pattern: "\\s", symbol: "-"};
+		config.ReplacePattern = config.ReplacePattern || { pattern: "\\W", symbol: "-"};
 		setIndicies();
 
 		return config;
@@ -92,8 +68,9 @@
 		// Prevent updating while this function is running
 		clearTimeout(updateTimer);
 		
-		let replacePattern = new RegExp(config.ReplacePattern.pattern, 'g');
-		let replaceSymbol = config.ReplacePattern.symbol;
+		
+		let delimiter = config.Delimiter;
+		console.log(delimiter);
 		let sorted = Array.from(indices).sort();
 
 		cName = '';
@@ -104,15 +81,13 @@
 					cName += `${formatDate(comp)}${delimiter}`;
 					break;
 				case "input": 
-					cName += `${getSubstitutions(urlComponents.get(i))}${delimiter}`;
+					cName += `${encode(getSubstitutions(comp))}${delimiter}`;
 					break;
 				case "select": 
-					cName += `${getSubstitutions(urlComponents.get(i))}${delimiter}`;
+					cName += `${getSubstitutions(comp)}${delimiter}`;
 					break;
 			}
-			
 		})
-		cName = cName.replaceAll(replacePattern, replaceSymbol);
 		cName = cName.substring(0, cName.length - 1);
 		
 		config.CampaignDetails.name = cName;
@@ -130,6 +105,13 @@
 			return input.subs[input.value] ? input.subs[input.value] : input.value;
 		} 
 		return input.value;
+	}
+
+	const encode = (value) => {
+		let replacePattern = new RegExp(config.ReplacePattern.pattern, 'g');
+		let replaceSymbol = config.ReplacePattern.symbol;
+		
+		return value.replace(replacePattern, replaceSymbol)
 	}
 
 	const saveConfig = ((config) => {

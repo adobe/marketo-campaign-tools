@@ -4,7 +4,7 @@ import Select from "../../form/Select.svelte";
 
 let config = {};
 let inputs = {};
-let typeToAdd = "Select";
+let typeToAdd = "select";
 
 // TODO: Set this handling across application
 sessionStorage.setItem("lastPage", "Dimensions");

@@ -1,38 +1,11 @@
 <script>
 	// let config = window.eapi.getConfig();
 	import UrlGroup from '../form/UrlGroup.svelte';
+	import { downloadFile } from '../lib/utils';
 
 	let conf = {};
 	let builderFields = {};
 	
-	let defaultFields = {
-            "baseUrl": {
-                "placeholder": "Base URL",
-                "type": "input",
-                "index": 0
-            },
-            "medium": {
-                "placeholder": "Medium",
-                "type": "select",
-                "index": 1,
-                "options": [
-                    {
-                        "label": "EMEA",
-                        "value": "EMEA"
-                    },
-                    {
-                        "label": "Asia Pacific",
-                        "value": "APAC"
-                    }
-                ]
-            },
-            "source": {
-                "placeholder": "Source",
-                "type": "input",
-                "index": 2
-            }
-		};
-
 	let entries = {};
 	let totalColumns;
 	
@@ -89,15 +62,6 @@
 		window.eapi.updateConfig(config)
 			.then(updated => console.log(`Configuration was updated: ${updated}`));
 	})
-
-	const exportEntries = async () => {
-		window.eapi.exportEntries()
-			.then((result) => {
-				console.log(`Received ${result}`);
-				window.open(result);
-			})
-			.catch(err => console.log(err));
-	}
 </script>
 
 <style>
@@ -109,7 +73,7 @@
 	.url-listings {
 		display: grid;
 		grid-template-columns: 1fr;
-		width: 100%;
+		width: 75vw;
 	}
 	
 	.url-listings__headers > h3 {
@@ -127,6 +91,26 @@
 
 	.url-index {
 		text-align: center;
+	}
+
+	.url-list__header {
+		height: 3rem;
+		margin: 0.5rem 0;
+		padding: 0.5rem 1rem;
+		width: calc(100% - 2rem);
+		display: grid;
+		border-bottom: 2px solid red;
+		grid-template-columns: 1fr 15%;
+		align-items: center;
+	}
+
+	.url-list__header div {
+		align-items: center;
+		display: grid;
+	}
+
+	.url-list__header button {
+		margin-bottom: 0;
 	}
 </style>
 
@@ -149,6 +133,10 @@
 					<button type="button" on:click={addNewRow}>+</button>
 				</div>
 			</div>
+		</div>
+		<div class="url-list__header">
+			<div><h2>URLs</h2></div>
+			<button on:click={() => { downloadFile("entries") }}>Export</button>
 		</div>
 		<div class="url-listings__section outputs">
 			{#each Object.values(entries) as { index, url }}
