@@ -1,13 +1,11 @@
 <script>
     import { createEventDispatcher } from 'svelte';
-    import Select from '../form/Select.svelte';
-    import Input from '../form/Input.svelte';
-
-    let conf = window.eapi.getConfig();
-    let parameterPrefix = conf.UrlBuilder?.prefix || "utm_";
-            
+    import Select from './Select.svelte';
+    import Input from './Input.svelte';
+    import Date from './Date.svelte'
+    
     // Setup variables
-
+    export let prefix = "utm_";
     export let entryKey;
     const dispatch = new createEventDispatcher();
     
@@ -21,7 +19,7 @@
     // Functions
     const handleChange = (e, input) => {
         let i = e.target.dataset.index;
-        indices.add(i, input);
+        indices.add(i);
         input.value = e.target.value;
         input.name = e.target.name;
         values[input.name] = input.value;
@@ -31,6 +29,8 @@
     }
 
     const updateUrl = () => {
+        url = '';
+        
         let sorted = Array.from(indices).sort();
         let firstParam = true;
 
@@ -39,7 +39,7 @@
             if (component.name == "baseUrl") {
                 url = `${component.value}`;
             } else {
-                url += `${firstParam ? '?' : '&'}${parameterPrefix}${component.name}=${component.value}`;
+                url += `${firstParam ? '?' : '&'}${prefix}${component.name}=${component.value}`;
                 firstParam = false;
             }
 
@@ -56,27 +56,49 @@
         });
     }
     
+    Object.keys(inputs).forEach((key) => {
+        if (!values[key]) {
+            return;
+        }
+        indices.add(inputs[key].index);
+        urlComponents.set(inputs[key].index, {
+            name: key, 
+            value: values[key]
+        });
+    })
+    
 </script>
 
 {#each Object.keys(inputs) as key }
-		{#if inputs[key].type === "select"}
-			<Select 
-				name="{key}" placeholder="{inputs[key].placeholder}" 
-				on:input={(e) => handleChange(e, inputs[key])} 
-				options={inputs[key].options} 
-				index={inputs[key].index} 
-				value={values ? (values[key] || '') : ''}
-			/>
-		{:else}
-			<Input 
-				name="{key}" 
-				placeholder="{inputs[key].placeholder}" 
-				on:input={(e) => handleChange(e, inputs[key])} 
-				index={inputs[key].index} 
-				value={values[key] || ''}
-			/>
-		{/if}
-	{/each}
+    {#if inputs[key].type === "select"}
+        <Select 
+            name="{key}" 
+            placeholder="{inputs[key].placeholder}" 
+            on:input={(e) => handleChange(e, inputs[key])} 
+            options={inputs[key].options} 
+            index={inputs[key].index} 
+            tooltip="{inputs[key].tooltip}"
+            value={values ? (values[key] || '') : ''}
+        />
+    {:else if inputs[key].type === "date"}
+        <Date 
+            name="{key}" 
+            on:change={(e) => handleChange(e, inputs[key])} 
+            index={inputs[key].index} 
+            value={inputs[key].value}
+            tooltip="{inputs[key].tooltip}" 
+        />
+    {:else}
+        <Input 
+            name="{key}" 
+            placeholder="{inputs[key].placeholder}" 
+            on:input={(e) => handleChange(e, inputs[key])} 
+            index={inputs[key].index} 
+            tooltip="{inputs[key].tooltip}"
+            value={values[key] || ''}
+        />
+    {/if}
+{/each}
 
 <style>
     input {

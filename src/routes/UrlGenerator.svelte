@@ -1,114 +1,150 @@
 <script>
 	// let config = window.eapi.getConfig();
 	import UrlGroup from '../form/UrlGroup.svelte';
+	import { downloadFile } from '../lib/utils';
 
-	let conf = window.eapi.getConfig();
-	let defaultFields = {
-            "baseUrl": {
-                "placeholder": "Base URL",
-                "type": "input",
-                "index": 0
-            },
-            "medium": {
-                "placeholder": "Medium",
-                "type": "select",
-                "index": 1,
-                "options": [
-                    {
-                        "label": "EMEA",
-                        "value": "EMEA"
-                    },
-                    {
-                        "label": "Asia Pacific",
-                        "value": "APAC"
-                    }
-                ]
-            },
-            "source": {
-                "placeholder": "Source",
-                "type": "input",
-                "index": 2
-            }
-		};
-	let builderFields = conf?.UrlBuilder?.inputs || defaultFields;
-
-	const entries = conf?.UrlBuilder?.entries || {};
+	let conf = {};
+	let builderFields = {};
+	
+	let entries = {};
+	let totalColumns;
+	
+	const init = (async () => {
+		conf = await window.eapi.getConfig();
+		builderFields = conf?.UrlBuilder?.inputs || defaultFields;
+		entries = conf?.UrlBuilder?.entries || {};
+		totalColumns = Object.keys(builderFields).length;
+	});		
+	let configurationLoaded = init();
 
 	// Functions
 	const addNewRow = () => {
-		console.log("adding new row");
+		let nextIndex = Object.keys(entries).length + 1;
+		entries[nextIndex.toString()] = {index: nextIndex };
 	}
 
+	const removeRow = (index) => {
+		delete entries[index.toString()];
+		let sortedEntries =	Object.entries(entries).sort((a, b) => {
+			a.index - b.index;
+		})
+		let sortedEntriesObject = {};
+		let i = 1;
+		sortedEntries.forEach((e) => {
+			e[1].index = i;
+			sortedEntriesObject[i.toString()] = e[1];
+			i++;
+		})
+		
+		entries = sortedEntriesObject;
+		conf.UrlBuilder.entries = entries;
+
+		updateTimer = setTimeout(() => {
+			saveConfig(conf);
+		}, 500)
+	}
+
+	let updateTimer;
 	const urlUpdated = (e) => {
+		
+		clearTimeout(updateTimer);
+		
 		entries[e.detail.index] = e.detail.entry;
-		window.eapi.entries(entries);
-		console.log(e.detail.entry);
+		conf.UrlBuilder = conf.UrlBuilder || {};
+		conf.UrlBuilder.entries = entries;
+
+		updateTimer = setTimeout(() => {
+			saveConfig(conf);
+		}, 500)
 	}
 
-	const exportEntries = async () => {
-		window.eapi.exportEntries()
-			.then((result) => {
-				console.log(`Received ${result}`);
-				window.open(result);
-			})
-			.catch(err => console.log(err));
-	}
+	const saveConfig = ((config) => {
+		window.eapi.updateConfig(config)
+			.then(updated => console.log(`Configuration was updated: ${updated}`));
+	})
 </script>
-<main>
-	<div class="campaign-name">
-		<h2>Campaign Name:</h2> {window.eapi.campaignName()}
-		<button type="button" on:click={exportEntries}>Export</button>
-	</div>
-
-	<div class="url-listings">
-		<div class="url-listings__headers url-listings__section">
-			<!-- Headers -->
-			<h3>Index</h3>
-			{#each Object.values(builderFields) as {placeholder}}
-				<h3>{placeholder}</h3>
-			{/each}
-		</div>
-		<div class="url-listings__section inputs">
-			{#each Object.values(entries) as {index, values}}
-			<div>{index}</div>
-				<UrlGroup entryKey={index} inputs={builderFields} values={values} on:urlUpdated={urlUpdated}></UrlGroup>
-			{/each}
-			<div>
-				<button type="button" on:click={addNewRow}>+</button>
-			</div>
-		</div>
-		<div class="url-listings__section outputs">
-			{#each Object.values(entries) as { index, url }}
-				<div>{index}</div>
-				<input type="text" disable class="url-output" value="{url}" />
-			{/each}
-		</div>
-	</div>
-</main>
 
 <style>
-	.campaign-name {
+	.url-parameters {
 		display: grid;
-		grid-template-columns: 1fr 3fr 1fr;
-		align-items: center;
+		grid-template-columns: 5% repeat(var(--totalColumns),1fr);
 	}
 
 	.url-listings {
 		display: grid;
 		grid-template-columns: 1fr;
-		width: 100%;
+		width: 75vw;
 	}
 	
 	.url-listings__headers > h3 {
-		border: 1px solid grey;
-	}
-
-	.url-listings__section {
+		border-right: 1px solid grey;
+		padding-left: 0.5rem;
 		display: grid;
-		grid-template-columns: 1fr 4fr repeat(5, 2fr);
-	}	
+		align-items: center;
+		font-size: 0.9em;
+	}
 
 	.url-listings__section.outputs {
-		grid-template-columns: 1fr 14fr;
+		display: grid;
+		grid-template-columns: 1fr 1fr 13fr;
+	}
+
+	.url-index {
+		text-align: center;
+	}
+
+	.url-list__header {
+		height: 3rem;
+		margin: 0.5rem 0;
+		padding: 0.5rem 1rem;
+		width: calc(100% - 2rem);
+		display: grid;
+		border-bottom: 2px solid red;
+		grid-template-columns: 1fr 15%;
+		align-items: center;
+	}
+
+	.url-list__header div {
+		align-items: center;
+		display: grid;
+	}
+
+	.url-list__header button {
+		margin-bottom: 0;
 	}
 </style>
+
+<main>
+	{#await configurationLoaded}
+		<div>Loading...</div>
+	{:then}
+		<div class="url-listings">
+			<div class="url-listings__headers url-parameters url-listings__section" style="--totalColumns:{totalColumns}">
+				<!-- Headers -->
+				<h3>Index</h3>
+				{#each Object.values(builderFields) as {label}}
+					<h3>{label}</h3>
+				{/each}
+				{#each Object.values(entries) as {index, values}}
+				<div class="url-index">{index}</div>
+					<UrlGroup entryKey={index} prefix={conf.UrlBuilder?.prefix} inputs={builderFields} values={values} on:urlUpdated={urlUpdated}></UrlGroup>
+				{/each}
+				<div>
+					<button type="button" on:click={addNewRow}>+</button>
+				</div>
+			</div>
+		</div>
+		<div class="url-list__header">
+			<div><h2>URLs</h2></div>
+			<button on:click={() => { downloadFile("entries") }}>Export</button>
+		</div>
+		<div class="url-listings__section outputs">
+			{#each Object.values(entries) as { index, url }}
+				<button on:click={(e) => { removeRow(index) }}>-</button>
+				<div class="url-index">{index}</div>
+				<input type="text" disable class="url-output" value="{url}" />
+			{/each}
+		</div>
+	{/await}
+</main>
+

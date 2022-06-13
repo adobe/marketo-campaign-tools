@@ -1,39 +1,41 @@
 <script>
-    import { onMount } from 'svelte';
-    
+    import { downloadFile } from '../../lib/utils';
+
     let files;
     let config = {};
 
-    onMount(async() => {
-        let loadedConfiguration = window.eapi.getConfig()?.configurationPath;
-        if (loadedConfiguration) {
+    const init = (async() => {
+        config = await window.eapi.getConfig();
+        if (config.configPath) {
             console.log("Loaded configuration");
-            files = [loadedConfiguration];
+            files = [config.configPath];
         }
+        return true
     })
+
+    let initialization = init();
 
     const setFileToUpload = () => {
         window.eapi.setUploadPath(files[0].name, files[0].path);
     }
-
-    const showConfigration = () => {
-        config = window.eapi.getConfig();
-        console.log(`The current configuration is: ${JSON.stringify(config, 2)}`);
-    }
 </script>
-
-<form>
-    <input type="file" id="myFile" name="filename" bind:files>
-    <button type="button" on:click|preventDefault={setFileToUpload}>Upload</button>    
-    <button type="button" on:click={showConfigration}>Get Config</button>
-    <div class="loaded-file">
-        <b>Currently loaded file:</b> {files ? files[0] : "No configuration specified"}
-    </div>
-    <pre>
-        {JSON.stringify(config, null, 2)}
-    </pre>
-</form> 
-
+<main>
+    {#await initialization}
+        <div>Loading...</div>
+    {:then}
+        <form>
+            <input type="file" id="myFile" name="filename" bind:files>
+            <button type="button" on:click|preventDefault={setFileToUpload}>Upload</button>    
+            <a href="{config.configPath}" download={`${config.CampaignDetails.name}-config.json`} target="_blank">Download</a>
+            <div class="loaded-file">
+                <b>Currently loaded file:</b> {files ? files[0] : "No configuration specified"}
+            </div>
+            <pre>
+                {JSON.stringify(config, null, 2)}
+            </pre>
+        </form> 
+    {/await}
+</main>
 <style>
     .loaded-file {
         padding: 1rem 0;

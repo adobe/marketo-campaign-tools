@@ -4,9 +4,10 @@ const os = require('os');
 const fs = require('fs/promises');
 const { constants, createWriteStream } = require('fs');
 const { format } = require('@fast-csv/format');
-const http = require('http');
+const DefaultConfig = require('./defaultConfig');
 
 let userConfigPath = path.join(os.homedir(),".marketo-toolkit");
+let configPath;
 
 const createLocalConfig = (config) => {
     
@@ -45,8 +46,9 @@ const updateConfiguration = async (config) => {
         console.log(`Local configuration file method was called without a configuration`);
     }
 
-    let toolkitConfigPath = config.configurationPath;
-    let err = await fs.writeFile(toolkitConfigPath, JSON.stringify(config), 'utf-8');
+    sortConfigInputs(config);
+
+    let err = await fs.writeFile(config.configPath, JSON.stringify(config), 'utf-8');
     if (err !== undefined) {
         console.error(err);
         return false;
@@ -54,30 +56,54 @@ const updateConfiguration = async (config) => {
         return true;
     }
 }
+
+// TODO: Let this logic be on the client-side
+const sortConfigInputs = (config) => {
+    config.CampaignDetails.Inputs = Object.fromEntries(Object.entries(config.CampaignDetails.Inputs).sort(([,a],[,b]) => a.index - b.index))
+}
    
 
 const openUserConfig = () => {
-    const { O_RDONLY } = constants;
-
     return fs.readFile(userConfigPath, 'utf-8');
 }
 
 // TODO: Test this against empty configruations (local user and toolkit level)
-const loadConfiguration = async (func) => {
-    let contents = await openUserConfig();
-    let conf = JSON.parse(contents);
-    let fh = await fs.open(conf.configPath);
-    let fileContents = await fh.readFile("utf-8"); 
+const loadConfiguration = async (fn) => {
 
-    let configJson = JSON.parse(fileContents);
+    let configJson;
+    let exists = true;
+
+    try {
+        let contents = await openUserConfig(); 
+        let conf = JSON.parse(contents);
+        configPath = conf.configPath;
+        let fh = await fs.open(conf.configPath);
+        let fileContents = await fh.readFile("utf-8"); 
+        configJson = JSON.parse(fileContents);
+        fh.close();
+    } catch (err) {
+        console.log(`Error while attempting to retrieve configuration, creating default`);
+        configJson = DefaultConfig;
+        configPath = path.join(os.homedir(),".marketo-toolkit-configuration");
+        exists = false;
+    }
+
     Object.assign(configJson, 
         {
             "userConfigPath" : userConfigPath, 
-            "configurationPath" : conf.configPath
+            "configPath" : configPath
         }
     );
-    func(configJson);
-    fh.close();
+
+    if (!exists) {
+        createLocalConfig({
+            "userConfigPath" : userConfigPath, 
+            "configPath" : configPath
+        });
+        updateConfiguration(configJson);
+    }
+
+    fn(configJson);
 }
 
 const createWindow = () => {
@@ -88,7 +114,7 @@ const createWindow = () => {
 
     const mainWindow = new BrowserWindow({
         width: parseInt(width * 0.7),
-        height: parseInt(height * 0.6),
+        height: parseInt(height * 0.8),
         webPreferences: {
             preload: path.join(__dirname, 'preload.js')
         }
@@ -97,9 +123,6 @@ const createWindow = () => {
     loadConfiguration((contentsJson) => {mainWindow.webContents.send('configuration-loaded',contentsJson)});
     
     mainWindow.loadFile(path.join(__dirname, "public/index.html"));
-    
-    // TODO: Remove after dev (or make optional via arg)
-    mainWindow.webContents.openDevTools()
 };
 
 ipcMain.handle('configuration-updated', async (e, conf) => {
@@ -155,7 +178,9 @@ ipcMain.handle('create-url-exports', async (e, entries, campaignName) => {
     return filePath;
 })
 
-// http.get('/exports')
+ipcMain.handle('create-config-export', async () => {
+    return configPath;
+})
 
 app.whenReady().then(() => {
     createWindow();

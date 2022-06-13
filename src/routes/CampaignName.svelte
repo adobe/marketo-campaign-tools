@@ -1,39 +1,19 @@
 <script>
+	import { createEventDispatcher } from 'svelte';
 	import Input from '../form/Input.svelte';
 	import TextArea from '../form/Textarea.svelte';
-	import Counter from '../form/Counter.svelte';
 	import Select from '../form/Select.svelte'; 
+	import Date from '../form/Date.svelte';
+	
+	// Utilities
+	import { formatDate } from '../lib/utils';
 
 	let urlComponents = new Map();
 	let indices = new Set();
 	let cName = '';
+	let inputs =  {};
 
 	// Establish the first set of campaign details immediately
-	let inputs = {
-		"campaignID": {
-			"label": "Campaign ID",
-			"placeholder": "Input Campaign ID",
-			"index": 1,
-			"type": "input",
-			"subs": {}
-    	},
-		"campaignDetails": {
-			"label": "Campaign Details",
-			"placeholder": "Details",
-			"index": 5,
-			"type": "input",
-			"subs": {}
-    	},
-		"campaignType": {
-			"label": "Campaign Type",
-			"placeholder": "Input Type",
-			"index": 6,
-			"type": "input",
-			"subs": {}
-    	},
-	};
-	
-	let delimiter = "_";
 	let config = {};	
 
 	// Get saved details and configurations, initialize page
@@ -41,12 +21,11 @@
 		config = await window.eapi.getConfig();
 		
 		if (config !== undefined) {
-			Object.assign(inputs, config.Inputs);
-			delimiter = config.Delimiter;	
+			Object.assign(inputs, config.CampaignDetails?.Inputs);
 		}
 		config.CampaignDetails = config.CampaignDetails || {"name": ""}
 		cName = config.CampaignDetails.name;
-		config.ReplacePattern = config.ReplacePattern || { pattern: "\\s", symbol: "-"};
+		config.ReplacePattern = config.ReplacePattern || { pattern: "\\W", symbol: "-"};
 		setIndicies();
 
 		return config;
@@ -55,7 +34,9 @@
 	// Functions
 	
 	const setIndicies = (() => {
-		Object.values(config.Inputs).forEach((input) => {
+		inputs = Object.fromEntries(Object.entries(inputs).sort(([,a],[,b]) => a.index - b.index))
+		window.eapi.sortConfig(config);
+		Object.values(inputs).forEach((input) => {
 			if (input.value) {
 				addToIndexAndComponents(input);
 			}
@@ -80,24 +61,39 @@
 		updateUrl();
 	}
 	
+	const dispatch = new createEventDispatcher();
 	let updateTimer;
 	const updateUrl = () => {
 		
 		// Prevent updating while this function is running
 		clearTimeout(updateTimer);
 		
-		let replacePattern = new RegExp(config.ReplacePattern.pattern, 'g');
-		let replaceSymbol = config.ReplacePattern.symbol;
-		let sorted = Array.from(indices).sort();
 		
+		let delimiter = config.Delimiter;
+		console.log(delimiter);
+		let sorted = Array.from(indices).sort();
+
 		cName = '';
 		sorted.forEach(i => {
-			cName += `${getSubstitutions(urlComponents.get(i))}${delimiter}`;
+			let comp = urlComponents.get(i);
+			switch (comp.type) {
+				case "date": 
+					cName += `${formatDate(comp)}${delimiter}`;
+					break;
+				case "input": 
+					cName += `${encode(getSubstitutions(comp))}${delimiter}`;
+					break;
+				case "select": 
+					cName += `${getSubstitutions(comp)}${delimiter}`;
+					break;
+			}
 		})
-		cName = cName.replaceAll(replacePattern, replaceSymbol);
 		cName = cName.substring(0, cName.length - 1);
 		
 		config.CampaignDetails.name = cName;
+		config.CampaignDetails.Inputs = inputs;
+
+		dispatch('nameChange', { cname: cName });
 
 		updateTimer = setTimeout(() => {
 			saveConfig(config);
@@ -111,6 +107,13 @@
 		return input.value;
 	}
 
+	const encode = (value) => {
+		let replacePattern = new RegExp(config.ReplacePattern.pattern, 'g');
+		let replaceSymbol = config.ReplacePattern.symbol;
+		
+		return value.replace(replacePattern, replaceSymbol)
+	}
+
 	const saveConfig = ((config) => {
 		window.eapi.updateConfig(config)
 			.then(updated => console.log(`Configuration was updated: ${updated}`));
@@ -119,21 +122,32 @@
 <main>
 	{#await initialization}
 		<div>...loading</div>
-	{:then config}
+	{:then}
 		{#each Object.keys(inputs) as key }
 			{#if inputs[key].type === "select"}
 				<Select 
 					label="{inputs[key].label}" 
-					name="{key}" placeholder="{inputs[key].placeholder}" 
+					name="{key}" 
+					placeholder="{inputs[key].placeholder}" 
+					tooltip="{inputs[key].tooltip}"
 					on:input={(e) => handleChange(e, inputs[key])} 
 					options={inputs[key].options} 
 					index={inputs[key].index} 
 					bind:value={inputs[key].value}
 				/>
+			{:else if inputs[key].type === "date"}
+				<Date 
+					label="{inputs[key].label}" 
+					name="{key}" 
+					tooltip="{inputs[key].tooltip}"
+					on:change={(e) => handleChange(e, inputs[key])} 
+					index={inputs[key].index} 
+					bind:value={inputs[key].value} />
 			{:else}
 				<Input 
 					label="{inputs[key].label}" 
 					name="{key}" 
+					tooltip="{inputs[key].tooltip}"
 					placeholder="{inputs[key].placeholder}" 
 					on:input={(e) => handleChange(e, inputs[key])} 
 					index={inputs[key].index} 
@@ -141,32 +155,12 @@
 				/>
 			{/if}
 		{/each}
-	
 
 		<!-- This area is for output only  -->
 		<TextArea name="generatedUrl" text={cName} placeholder="Campaign name will appear here" />
-		<Counter label={"Number of characters!:"} count={cName.length} />
 	{/await}
 </main>
 
 <style>
-	main {
-		text-align: center;
-		padding: 1em;
-		max-width: 240px;
-		margin: 0 auto;
-	}
 
-	/* h1 {
-		color: #ff3e00;
-		text-transform: uppercase;
-		font-size: 4em;
-		font-weight: 100;
-	} */
-
-	@media (min-width: 640px) {
-		main {
-			max-width: none;
-		}
-	}
 </style>
