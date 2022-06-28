@@ -127,6 +127,10 @@
 		margin-right: 1rem;
 	}
 
+
+	/** 
+	* SECTION: Main menu
+	*/
 	menu {
         margin-left: 0;
         padding-left: 1rem;
@@ -160,6 +164,7 @@
 		font-weight: bold;
 	}
 
+	/* The folloing are related to the main menu, but required as global as they target elements in sub-components */
 	:global(li:hover div svg) {
 		fill: rgb(255,0,0);
         transform: scale(1.25);
@@ -188,10 +193,9 @@
 		border-left: 2px solid slategray
 	}	
 
-	.hide {
-		display:none;
-	}
-
+	/** 
+	* SECTION: Header
+	*/
 	.header {
 		display: grid;
 		grid-template-columns: 1fr 3fr 1fr;
@@ -234,6 +238,13 @@
 		overflow-y: scroll;
 	}
 
+	:global(.hide) {
+		display:none;
+	}
+
+	/** 
+	* SECTION: Forms and Inputs
+	*/
 	:global(.cmp-input) {
 		display: grid;
         width: 100%;

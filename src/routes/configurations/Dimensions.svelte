@@ -1,7 +1,9 @@
 <script>
-import Input from "../../form/Input.svelte";
-import Select from "../../form/Select.svelte";
-import AddInput from "../../form/AddInput.svelte";
+import Input from '../../form/Input.svelte';
+import Select from '../../form/Select.svelte';
+import AddInput from '../../form/AddInput.svelte';
+import Options from '../../form/Options.svelte';
+import { removeOption, addNewOption, handleOptsKeyUpdate, handleOptsValueUpdate } from '../../lib/utils';
 
 let config = {};
 let inputs = {};
@@ -26,64 +28,7 @@ const handleFieldUpdate = ((e, key, field) => {
     config.CampaignDetails.Inputs[key][field] = e.target.value;
     inputs = config.CampaignDetails.Inputs;
 })
-
-// ----- Substitution Handling ----- 
-const handleSubsKeyUpdate = ((e, key, input, sub) => {
-    input.subs[e.target.value] = input.subs[sub];
-    delete input.subs[sub];
-    inputs[key] = input;
-    config.CampaignDetails.Inputs = inputs;
-})
-
-const handleSubsValueUpdate = ((e, key, input, sub) => {
-    input.subs[sub] = e.target.value;
-    inputs[key] = input;
-    config.CampaignDetails.Inputs = inputs;
-})
-
-const addNewSub = ((key) => {
-    let input = inputs[key];
-    input.subs["newSub"] = "";
-    inputs[key] = input;
-    config.CampaignDetails.Inputs = inputs;
-});
-
-const removeSub = ((k, s) => {
-    let input = inputs[k];
-    delete input.subs[s];
-    inputs[k] = input;
-    config.CampaignDetails.Inputs = inputs;
-})
-
-// ----- Options Handling -----
-
-const handleOptsKeyUpdate = ((e, key, input, i) => {
-    let val = e.target.value;
-    input.options[i].label = val;
-    inputs[key] = input;
-    config.CampaignDetails.Inputs = inputs;
-})
-
-const handleOptsValueUpdate = ((e, key, input, index) => {
-    input.options[index].value = e.target.value;
-    inputs[key] = input;
-    config.CampaignDetails.Inputs = inputs;
- })
-
- const addNewOption = ((key) => {
-    let input = inputs[key];
-    input.options[input.options.length++] = {
-        "label": "new option", 
-        "value": ""
-    }
-    inputs[key] = input;
-    config.CampaignDetails.Inputs = inputs; 
-})
-    
-const removeOption = ((k, i) => {
-    inputs[k].options.splice(i, 1);
-    config.CampaignDetails.Inputs = inputs;
-})
+ 
 // ----- Type Changes Handling -----
 
 const handleTypeChange = ((e, key) => {
@@ -170,8 +115,8 @@ const debounceWrapper = function(timer, cb, time) {
 }
 
 // Using to simplify handler logic
-const debounceAndUpdate = (handler) => {
-    debounceWrapper(updateDebounce, handler, 500);
+const debounceAndUpdate = (handler, time = 500) => {
+    debounceWrapper(updateDebounce, handler, time);
 }
 
 </script>
@@ -190,20 +135,15 @@ const debounceAndUpdate = (handler) => {
                 />
                 {#each Object.keys(inputs[key]) as subkey}
                     {#if subkey === "options"}
-                        Options: 
-                        <div class="options-listing__header">
-                            <div>Label</div>
-                            <div>Value</div>
-                            <div><!-- spacer --></div>
-                        </div>
-                        <div class="option-listing">
-                            {#each inputs[key].options as option, i}
-                                <input value={option.label} on:input={(e) =>  debounceAndUpdate(() => handleOptsKeyUpdate(e, key, inputs[key], i))}/>
-                                <input value={option.value} on:input={(e) => debounceAndUpdate(() => handleOptsValueUpdate(e, key, inputs[key], i))}/>
-                                <button class="btn-remove__option" on:click={(e) => debounceAndUpdate(() => removeOption(key, i))}>Remove</button>
-                            {/each}
-                        </div>
-                        <button class="btn-add" on:click={(e) => { addNewOption(key) }}>Add Option</button>
+                        <Options 
+                            label={"Options"}
+                            key="{key}"
+                            inputs="{inputs}"
+                            on:OptionKeyUpdated={(e) => debounceAndUpdate(() => handleOptsKeyUpdate(config.CampaignDetails.Inputs, inputs, e.detail))}
+                            on:OptionValueUpdated={(e) => debounceAndUpdate(() => handleOptsValueUpdate(config.CampaignDetails.Inputs, inputs, e.detail))}
+                            on:OptionAdded={(e) => debounceAndUpdate(() => addNewOption(config.CampaignDetails.Inputs, inputs, e.detail.key), 100)}
+                            on:OptionRemoved={(e) => debounceAndUpdate(() => removeOption(config.CampaignDetails.Inputs, inputs, e.detail.key, e.detail.index), 100)}
+                        />
                     {:else if subkey === "type"}
                             <Select 
                                 label="{subkey}" 
@@ -228,14 +168,15 @@ const debounceAndUpdate = (handler) => {
                     {:else if subkey === "value"}
                         <!-- Value is: ${inputs[key][subkey]} -->
                     {:else if subkey === "subs"}
-                        Substitutions: 
+                        <!-- TODO: Commenting out the below until review of no-substitution functionality is performed-->
+                        <!-- Substitutions: 
                         <div class="info">
                             Substitutions are utilized with text inputs. They will convert the original text (left) with the substution text (right) when used in a campaign name or URL.
                         </div>
                         <div class="options-listing__header">
                             <div>Original</div>
                             <div>Substitution</div>
-                            <div><!-- spacer --></div>
+                            <div></div>
                         </div>
                         {#each Object.entries(inputs[key].subs) as sub}
                             <div class="option-listing">
@@ -244,7 +185,7 @@ const debounceAndUpdate = (handler) => {
                                 <button class="btn-remove__sub" on:click={(e) => debounceAndUpdate(() => removeSub(key, sub[0]))}>-</button>
                             </div>
                         {/each}
-                        <button class="btn-add" on:click={(e) => { addNewSub(key) }}>Add Substitution</button>
+                        <button class="btn-add" on:click={(e) => { addNewSub(key) }}>Add Substitution</button> -->
                     {:else}
                         <Input 
                             label="{subkey}"
@@ -271,16 +212,5 @@ const debounceAndUpdate = (handler) => {
         color: #fff;
     }
 
-    .btn-add {
-        width: 25%;
-        background-color: slategray;
-        color: white;
-        border-radius: 4px;
-    }
-
-    .option-listing, .options-listing__header {
-        display: grid;
-        grid-template-columns: 3fr 3fr 1fr;
-        column-gap: 1rem;
-    }
+    
 </style>

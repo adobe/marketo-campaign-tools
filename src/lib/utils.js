@@ -19,3 +19,59 @@ export const downloadFile = async (file) => {
         })
         .catch(err => console.log(err));
 }
+
+// ------ FORM HANDLING: OPTIONS ------ /
+
+export const removeOption = ((ref, inputs, k, i) => {
+    inputs[k].options.splice(i, 1);
+    ref = inputs;  
+})
+
+export const addNewOption = ((ref, inputs, key) => {
+    inputs[key].options[inputs[key].options.length++] = {
+        "label": "new option", 
+        "value": ""
+    }
+    ref = inputs; 
+})
+
+export const handleOptsKeyUpdate = ((ref, inputs, detail) => {
+    // e.detail.value, e.detail.key, e.detail.input, e.detail.index
+    detail.input.options[detail.index].label = detail.value;
+    inputs[detail.key] = detail.input;
+    ref = inputs;
+})
+
+export const handleOptsValueUpdate = ((ref, inputs, detail) => {
+    detail.input.options[detail.index].value = detail.value;
+    inputs[detail.key] = detail.input;
+    ref = inputs;
+ })
+
+ // ------ FORM HANDLING: SUBSTITUIONS ------ /
+export const handleSubsKeyUpdate = ((ref, inputs, e, key, input, sub) => {
+    input.subs[e.target.value] = input.subs[sub];
+    delete input.subs[sub];
+    inputs[key] = input;
+    ref = inputs;
+})
+
+export const handleSubsValueUpdate = ((ref, inputs, e, key, input, sub) => {
+    input.subs[sub] = e.target.value;
+    inputs[key] = input;
+    ref = inputs;
+})
+
+export const addNewSub = ((ref, inputs, key) => {
+    let input = inputs[key];
+    input.subs["newSub"] = "";
+    inputs[key] = input;
+    ref = inputs;
+});
+
+export const removeSub = ((ref, inputs, k, s) => {
+    let input = inputs[k];
+    delete input.subs[s];
+    inputs[k] = input;
+    ref = inputs;
+});
