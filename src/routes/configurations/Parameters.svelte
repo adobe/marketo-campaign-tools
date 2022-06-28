@@ -1,9 +1,9 @@
 <script>
     import Input from '../../form/Input.svelte';
     import Select from '../../form/Select.svelte';
+    import AddInput from '../../form/AddInput.svelte';
 
     let config;
-    let typeToAdd = "select";
     let inputs;
 
     const init = async() => {
@@ -14,14 +14,6 @@
     let initalization = init();
  
     let updateDebounce;
-
-    /**
-    * Update types / values
-    */ 
-
-    /**
-    * Update options
-    */ 
 
     // ----- Options Handling -----
 
@@ -81,7 +73,7 @@
     })
     
     // ----- Add / Remove Parameter Handling -----
-    const addNewParameter = () => {
+    const addNewParameter = (typeToAdd) => {
         let input =  {
             "label": "",
             "index": 0,
@@ -183,7 +175,7 @@
         {#each Object.keys(config.UrlBuilder.inputs) as key}
             <fieldset>
                 <Input 
-                    label="key"
+                    label="name"
                     name="{key}" 
                     placeholder="{key}" 
                     on:change={(e) => { debounceAndUpdate(() => handleInputUpdate(e, key, inputs[key]))}}
@@ -192,6 +184,11 @@
                 {#each Object.keys(inputs[key]) as subkey}
                     {#if subkey === "options"}
                         Options: 
+                        <div class="options-listing__header">
+                            <div>Label</div>
+                            <div>Value</div>
+                            <div><!-- spacer --></div>
+                        </div>
                         <div class="option-listing">
                             {#each inputs[key].options as option, i}
                                 <input value={option.label} on:input={(e) =>  debounceAndUpdate(() => handleOptsKeyUpdate(e, key, inputs[key], i))}/>
@@ -202,6 +199,14 @@
                         <button class="btn-add" on:click={(e) => { addNewOption(key) }}>Add Option</button>
                     {:else if subkey === "subs"}
                         Substitutions: 
+                        <div class="info">
+                            Substitutions are utilized with text inputs. They will convert the original text (left) with the substution text (right) when used in a campaign name or URL.
+                        </div>
+                        <div class="options-listing__header">
+                            <div>Original</div>
+                            <div>Substitution</div>
+                            <div><!-- spacer --></div>
+                        </div>
                         {#each Object.entries(inputs[key].subs) as sub}
                             <div class="option-listing">
                                 <input value={sub[0]} on:change={(e) => debounceAndUpdate(() => handleSubsKeyUpdate(e, key, inputs[key], sub[0]))} />
@@ -246,24 +251,34 @@
                 <button class="btn-remove" on:click={() => removeInput(key)}>Remove</button>
             </fieldset>
         {/each}
-        <Select 
-            label="Type to Add" 
-            options={[
-                {
-                    "label": "Select", 
-                    "value": "select"
-                },
-                {
-                    "label": "Input", 
-                    "value": "input"
-                },
-                {
-                    "label": "Date", 
-                    "value": "date"
-                }
-            ]}
-            bind:value={typeToAdd}
-        />
-        <button class="btn-add" on:click={() => addNewParameter()}>Add New Parameter</button>
+        <AddInput on:newItemAdded={(e) => addNewParameter(e.detail.type)} />
     {/await}
 </main>
+
+<style>
+    .btn-remove {
+        width: 25%;
+        background-color: red;
+        border-radius: 4px;
+        float:right;
+        color: #fff;
+    }
+
+    .btn-add {
+        width: 25%;
+        background-color: slategray;
+        color: white;
+        border-radius: 4px;
+    }
+
+    .option-listing, .options-listing__header {
+        display: grid;
+        grid-template-columns: 3fr 3fr 1fr;
+        column-gap: 1rem;
+    }
+
+    .add-type {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+    }
+</style>

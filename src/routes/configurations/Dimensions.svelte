@@ -1,10 +1,10 @@
 <script>
 import Input from "../../form/Input.svelte";
 import Select from "../../form/Select.svelte";
+import AddInput from "../../form/AddInput.svelte";
 
 let config = {};
 let inputs = {};
-let typeToAdd = "select";
 
 // TODO: Set this handling across application
 sessionStorage.setItem("lastPage", "Dimensions");
@@ -121,7 +121,7 @@ const removeInput = ((key) => {
 			.then(updated => console.log(`Configuration was updated: ${updated}`));
 })
 
-const addNewInput = (() => {
+const addNewInput = ((typeToAdd) => {
      let input =  {
         "label": "",
         "placeholder": "",
@@ -182,7 +182,7 @@ const debounceAndUpdate = (handler) => {
         {#each Object.keys(config.CampaignDetails.Inputs) as key}
             <fieldset>
                 <Input 
-                    label="key"
+                    label="name"
                     name="{key}" 
                     placeholder="{key}" 
                     on:change={(e) => { debounceAndUpdate(() => handleInputUpdate(e, key, inputs[key]))}}
@@ -191,11 +191,16 @@ const debounceAndUpdate = (handler) => {
                 {#each Object.keys(inputs[key]) as subkey}
                     {#if subkey === "options"}
                         Options: 
+                        <div class="options-listing__header">
+                            <div>Label</div>
+                            <div>Value</div>
+                            <div><!-- spacer --></div>
+                        </div>
                         <div class="option-listing">
                             {#each inputs[key].options as option, i}
                                 <input value={option.label} on:input={(e) =>  debounceAndUpdate(() => handleOptsKeyUpdate(e, key, inputs[key], i))}/>
                                 <input value={option.value} on:input={(e) => debounceAndUpdate(() => handleOptsValueUpdate(e, key, inputs[key], i))}/>
-                                <button class="btn-remove__option" on:click={(e) => debounceAndUpdate(() => removeOption(key, i))}>-</button>
+                                <button class="btn-remove__option" on:click={(e) => debounceAndUpdate(() => removeOption(key, i))}>Remove</button>
                             {/each}
                         </div>
                         <button class="btn-add" on:click={(e) => { addNewOption(key) }}>Add Option</button>
@@ -221,9 +226,17 @@ const debounceAndUpdate = (handler) => {
                                 value={inputs[key][subkey]}
                             />
                     {:else if subkey === "value"}
-                        Value is: ${inputs[key][subkey]}
+                        <!-- Value is: ${inputs[key][subkey]} -->
                     {:else if subkey === "subs"}
                         Substitutions: 
+                        <div class="info">
+                            Substitutions are utilized with text inputs. They will convert the original text (left) with the substution text (right) when used in a campaign name or URL.
+                        </div>
+                        <div class="options-listing__header">
+                            <div>Original</div>
+                            <div>Substitution</div>
+                            <div><!-- spacer --></div>
+                        </div>
                         {#each Object.entries(inputs[key].subs) as sub}
                             <div class="option-listing">
                                 <input value={sub[0]} on:change={(e) => debounceAndUpdate(() => handleSubsKeyUpdate(e, key, inputs[key], sub[0]))} />
@@ -245,27 +258,7 @@ const debounceAndUpdate = (handler) => {
                 <button class="btn-remove" on:click={() => removeInput(key)}>Remove</button>
             </fieldset>
         {/each}
-        <div class="add-type">
-            <Select 
-                label="Type to Add" 
-                options={[
-                    {
-                        "label": "Select", 
-                        "value": "select"
-                    },
-                    {
-                        "label": "Input", 
-                        "value": "input"
-                    },
-                    {
-                        "label": "Date", 
-                        "value": "date"
-                    }
-                ]}
-                bind:value={typeToAdd}
-            />
-            <button class="btn-add" on:click={() => addNewInput()}>Add New Dimension</button>
-        </div>
+        <AddInput on:newItemAdded={(e) => addNewInput(e.detail.type)} />
     {/await}
 </main>
 
@@ -279,19 +272,15 @@ const debounceAndUpdate = (handler) => {
     }
 
     .btn-add {
-        width: 100%;
+        width: 25%;
         background-color: slategray;
         color: white;
         border-radius: 4px;
     }
 
-    .option-listing {
+    .option-listing, .options-listing__header {
         display: grid;
         grid-template-columns: 3fr 3fr 1fr;
-    }
-
-    .add-type {
-        display: grid;
-        grid-template-columns: 2fr 1fr;
+        column-gap: 1rem;
     }
 </style>
