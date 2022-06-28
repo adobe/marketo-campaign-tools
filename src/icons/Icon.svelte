@@ -23,5 +23,12 @@
     .auto { 
         width: 100%;
     }
+
+    
+    /* div:hover {
+        fill: rgb(255,0,0);
+        transform: scale(1.25);
+        transition: transform 0.2s, fill 0.2s;
+    } */
 </style>
 

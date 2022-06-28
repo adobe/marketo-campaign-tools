@@ -86,7 +86,7 @@
 	<div>{pageName}</div>
 </div>
 <div class="wrapper">
-	<menu>
+	<menu class="main-menu">
 		<li on:click="{() => setPage(CampaignName)}">
 			<Icon component={FormTable} />Campaign Name
 		</li>
@@ -142,6 +142,40 @@
 		grid-template-columns: 2rem 1fr;
 		column-gap: 1rem;
 		align-items: center;
+	}
+
+	li:hover {
+		font-weight: bold;
+	}
+
+	.main-menu { 
+		fill: #6a6a6a;
+	}
+
+	.main-menu .configuration-menu > li { 
+		font-weight: normal;
+	}
+
+	.main-menu .configuration-menu > li:hover { 
+		font-weight: bold;
+	}
+
+	:global(li:hover div svg) {
+		fill: rgb(255,0,0);
+        transform: scale(1.25);
+        transition: transform 0.2s, fill 0.2s;
+	}
+
+	:global(.main-menu .configuration-menu > li div svg) {
+		fill: #6a6a6a;
+        transform: none;
+        transition: none;
+	}
+
+	:global(.main-menu .configuration-menu > li:hover div svg) {
+		fill: rgb(255,0,0);
+        transform: scale(1.25);
+        transition: transform 0.2s, fill 0.2s;
 	}
 
 	.configuration-list-item {
