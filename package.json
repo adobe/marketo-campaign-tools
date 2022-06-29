@@ -1,6 +1,6 @@
 {
   "name": "marketo-reporting-framework-toolkit",
-  "version": "0.0.1",
+  "version": "0.2.0",
   "private": true,
   "main": "index.js",
   "scripts": {
@@ -59,7 +59,11 @@
             "win32"
           ]
         }
-      ]
+      ],
+      "make_targets": {
+        "win32": ["squirrel"], 
+        "darwin": ["dmg"]
+      }
     }
   }
 }
