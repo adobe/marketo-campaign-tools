@@ -68,6 +68,7 @@
 	.url-parameters {
 		display: grid;
 		grid-template-columns: 5% repeat(var(--totalColumns),1fr);
+		column-gap: 1rem;
 	}
 
 	.url-listings {
@@ -77,16 +78,21 @@
 	}
 	
 	.url-listings__headers > h3 {
-		border-right: 1px solid grey;
-		padding-left: 0.5rem;
+		border-left: 1px solid grey;
 		display: grid;
 		align-items: center;
 		font-size: 0.9em;
+		padding-left: 0.5rem;
 	}
 
 	.url-listings__section.outputs {
 		display: grid;
 		grid-template-columns: 1fr 1fr 13fr;
+	}
+
+	:global(.url-listings__section.outputs input) {
+		border: none;
+		border-bottom: 1px solid #ccc;
 	}
 
 	.url-index {

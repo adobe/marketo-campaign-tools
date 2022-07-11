@@ -254,11 +254,17 @@
 		width: calc(100% - 4rem);
 	}
 
+	:global(.cmp-input input) {
+		border: none;
+		border-bottom: 1px solid #ccc;
+	}
+
 	:global(.url-parameters .cmp-input) {
 		width: 100%;
 		min-width: 10rem;
 		grid-template-columns: 1fr;
 		padding: 0;
+		overflow-x: scroll;
 	}
 
 	:global(fieldset) {
