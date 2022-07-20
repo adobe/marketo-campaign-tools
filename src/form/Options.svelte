@@ -38,12 +38,22 @@
         background-color: slategray;
         color: white;
         border-radius: 4px;
+        margin: 1rem;
     }
 
     .option-listing, .options-listing__header {
         display: grid;
         grid-template-columns: 3fr 3fr 1fr;
         column-gap: 1rem;
+    }
+
+    .options-listing__header {
+        margin: 1rem 0;
+        line-height: 2rem;
+        padding-left: 0.5rem;
+        font-weight: bold;
+        border-bottom: 1px solid slategray;
+        color: slategray;
     }
 </style>
                         

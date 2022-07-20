@@ -1,9 +1,9 @@
 <script>
 import Input from '../../form/Input.svelte';
 import Select from '../../form/Select.svelte';
-import AddInput from '../../form/AddInput.svelte';
+import UtilityBar from '../../form/UtilityBar.svelte';
 import Options from '../../form/Options.svelte';
-import { removeOption, addNewOption, handleOptsKeyUpdate, handleOptsValueUpdate } from '../../lib/utils';
+import { removeOption, addNewOption, handleOptsKeyUpdate, handleOptsValueUpdate, sortObject } from '../../lib/utils';
 
 let config = {};
 let inputs = {};
@@ -103,7 +103,6 @@ const debounceWrapper = function(timer, cb, time) {
     clearTimeout(timer);
     cb();
     updateDebounce = setTimeout(() => {
-        window.eapi.sortConfig(config);
 
         // TODO: Figure out redraw while updating index
         inputs = config.CampaignDetails.Inputs;
@@ -118,6 +117,8 @@ const debounceWrapper = function(timer, cb, time) {
 const debounceAndUpdate = (handler, time = 500) => {
     debounceWrapper(updateDebounce, handler, time);
 }
+
+const sortItems = (() => { config.CampaignDetails.Inputs = sortObject(config.CampaignDetails.Inputs); });
 
 </script>
 <main>
@@ -199,7 +200,11 @@ const debounceAndUpdate = (handler, time = 500) => {
                 <button class="btn-remove" on:click={() => removeInput(key)}>Remove</button>
             </fieldset>
         {/each}
-        <AddInput on:newItemAdded={(e) => addNewInput(e.detail.type)} />
+        <UtilityBar 
+            configPage={true}
+            on:newItemAdded={(e) => addNewInput(e.detail.type)}
+            on:sortItems={() => debounceAndUpdate(() => sortItems())}>
+        </UtilityBar>
     {/await}
 </main>
 
@@ -210,6 +215,7 @@ const debounceAndUpdate = (handler, time = 500) => {
         border-radius: 4px;
         float:right;
         color: #fff;
+        margin-top: 1rem;
     }
 
     

@@ -1,5 +1,6 @@
 <script>
     import { createEventDispatcher } from 'svelte';
+    import { sort } from '../lib/utils';
     import Select from './Select.svelte';
     import Input from './Input.svelte';
     import Date from './Date.svelte'
@@ -12,6 +13,7 @@
     let url;
     export let values = {};
     export let inputs = {};
+    export let showLabel = false;
 
     let urlComponents = new Map();
     let indices = new Set();
@@ -25,6 +27,7 @@
         values[input.name] = input.value;
 
         urlComponents.set(i, input);
+        setComponents();
         updateUrl();
     }
 
@@ -56,7 +59,8 @@
         });
     }
     
-    Object.keys(inputs).forEach((key) => {
+    const setComponents = () => {
+        Object.keys(inputs).forEach((key) => {
         if (!values[key]) {
             return;
         }
@@ -65,11 +69,16 @@
             name: key, 
             value: values[key]
         });
-    })
-    
+       })
+    }
+
+    setComponents();
 </script>
 
 {#each Object.keys(inputs) as key }
+    {#if showLabel}
+        <label>{inputs[key].label}</label>
+    {/if}
     {#if inputs[key].type === "select"}
         <Select 
             name="{key}" 
@@ -85,7 +94,7 @@
             name="{key}" 
             on:change={(e) => handleChange(e, inputs[key])} 
             index={inputs[key].index} 
-            value={inputs[key].value}
+            value={values ? (values[key] || '') : ''}
             tooltip="{inputs[key].tooltip}" 
         />
     {:else}

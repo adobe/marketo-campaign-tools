@@ -1,6 +1,7 @@
 <script>
 	import CampaignName from './routes/CampaignName.svelte';
-	import UrlGenerator from './routes/UrlGenerator.svelte';
+	import UrlTable from './routes/UrlTable.svelte';
+	import UrlBuilder from './routes/UrlBuilder.svelte';
 
 	// Configuration Components
 	import Parameters from './routes/configurations/Parameters.svelte';
@@ -11,6 +12,7 @@
 	// Import icons
 	import Icon from './icons/Icon.svelte';
 	import Link from './icons/link.svelte';
+	import Links from './icons/links.svelte';
 	import Puzzle from './icons/puzzle.svelte';
 	import Dimension from './icons/dimensions.svelte';
 	import FileUpload from './icons/file-upload.svelte';
@@ -52,8 +54,12 @@
 				pageName = "Campaign Name";
 				showConfig = false;
 				break;
-			case UrlGenerator: 
-				pageName = "URL Builder";
+			case UrlTable: 
+				pageName = "URL Manager - Table";
+				showConfig = false;
+				break;
+			case UrlBuilder: 
+				pageName = "URL Manager - Detail";
 				showConfig = false;
 				break;
 			case Parameters: 
@@ -74,6 +80,10 @@
 	}
 
 	setPage(page);
+
+	const handleUrlViewChange = (e) => {
+		setPage(e.detail.view === "table" ? UrlTable : UrlBuilder);
+	}
 	
 </script>
 
@@ -90,8 +100,8 @@
 		<li on:click="{() => setPage(CampaignName)}">
 			<Icon component={FormTable} />Campaign Name
 		</li>
-		<li on:click="{() => setPage(UrlGenerator)}">
-			<Icon component={Link} />URL
+		<li on:click="{() => setPage(UrlTable)}">
+			<Icon component={Links} />URL Manager
 		</li>
 		<li on:click="{() => revealConfig()}" class="configuration-list-item">
 			Configure
@@ -111,7 +121,7 @@
 			</menu>
 		</li>
 	</menu>
-	<svelte:component this={page} on:nameChange={updateName} />
+	<svelte:component this={page} on:nameChange={updateName} on:viewChanged={handleUrlViewChange} />
 </div>
 
 <style>

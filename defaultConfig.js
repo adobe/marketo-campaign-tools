@@ -48,7 +48,7 @@ const defaultConfig = {
                 "type": "input",
                 "index": 0,
                 "name": "baseUrl"
-            }
+            } 
         }
     }
 }

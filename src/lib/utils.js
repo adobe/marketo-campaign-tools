@@ -75,3 +75,5 @@ export const removeSub = ((ref, inputs, k, s) => {
     inputs[k] = input;
     ref = inputs;
 });
+
+export const sortObject = ((obj) => Object.fromEntries(Object.entries(obj).sort(([,a],[,b]) => a.index - b.index)));

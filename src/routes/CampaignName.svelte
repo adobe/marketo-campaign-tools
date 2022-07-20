@@ -1,5 +1,6 @@
 <script>
 	import { createEventDispatcher } from 'svelte';
+	import { sortObject } from '../lib/utils';
 	import Input from '../form/Input.svelte';
 	import TextArea from '../form/Textarea.svelte';
 	import Select from '../form/Select.svelte'; 
@@ -35,7 +36,7 @@
 	
 	const setIndicies = (() => {
 		inputs = Object.fromEntries(Object.entries(inputs).sort(([,a],[,b]) => a.index - b.index))
-		window.eapi.sortConfig(config);
+		config.CampaignDetails.Inputs = sortObject(config.CampaignDetails.Inputs);
 		Object.values(inputs).forEach((input) => {
 			if (input.value) {
 				addToIndexAndComponents(input);

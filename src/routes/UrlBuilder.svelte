@@ -1,19 +1,24 @@
 <script>
 	// let config = window.eapi.getConfig();
+	import { sortObject } from '../lib/utils';
 	import UrlGroup from '../form/UrlGroup.svelte';
-	import { downloadFile } from '../lib/utils';
+	import ViewSelect from '../form/ViewSelect.svelte';
 
 	let conf = {};
 	let builderFields = {};
 	
 	let entries = {};
-	let totalColumns;
+	let activeIndex;
 	
 	const init = (async () => {
 		conf = await window.eapi.getConfig();
 		builderFields = conf?.UrlBuilder?.inputs || defaultFields;
+		builderFields = sortObject(builderFields);
 		entries = conf?.UrlBuilder?.entries || {};
-		totalColumns = Object.keys(builderFields).length;
+		entries = sortObject(entries);
+
+		let entriesList = Object.values(entries);
+		activeIndex = entriesList.length > 0 ? entriesList[0].index : 0;
 	});		
 	let configurationLoaded = init();
 
@@ -48,8 +53,8 @@
 	const urlUpdated = (e) => {
 		
 		clearTimeout(updateTimer);
-		
-		entries[e.detail.index] = e.detail.entry;
+		console.log(e.detail);
+		entries[activeIndex] = e.detail.entry;
 		conf.UrlBuilder = conf.UrlBuilder || {};
 		conf.UrlBuilder.entries = entries;
 
@@ -67,8 +72,32 @@
 <style>
 	.url-parameters {
 		display: grid;
-		grid-template-columns: 5% repeat(var(--totalColumns),1fr);
+		grid-template-columns: 1fr 7fr;
 		column-gap: 1rem;
+	}
+
+	.index-column { 
+		display: grid;
+		grid-template-columns: 1fr;
+		align-items: center;
+		justify-content: center;
+		text-align: center;
+		height: 4rem;
+		margin: 1rem;
+		/* font-size: 2.5em; */
+		border-bottom: 2px solid red;
+	}
+
+	.index-column h2,h3 {
+		margin: 0;
+	}
+
+	.url-parameters .configuration {
+		display: grid;
+		grid-template-columns: 1fr 4fr;
+		column-gap: 1rem;
+		row-gap: 0.5rem;
+		align-items: center;
 	}
 
 	.url-listings {
@@ -76,14 +105,7 @@
 		grid-template-columns: 1fr;
 		width: 75vw;
 	}
-	
-	.url-listings__headers > h3 {
-		border-left: 1px solid grey;
-		display: grid;
-		align-items: center;
-		font-size: 0.9em;
-		padding-left: 0.5rem;
-	}
+
 
 	.url-listings__section.outputs {
 		display: grid;
@@ -96,7 +118,9 @@
 	}
 
 	.url-index {
-		text-align: center;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 
 	.url-list__header {
@@ -118,6 +142,12 @@
 	.url-list__header button {
 		margin-bottom: 0;
 	}
+
+	.url-index.active {
+		background-color: red;
+		color: white;
+		font-weight: bold;
+	}
 </style>
 
 <main>
@@ -125,32 +155,34 @@
 		<div>Loading...</div>
 	{:then}
 		<div class="url-listings">
-			<div class="url-listings__headers url-parameters url-listings__section" style="--totalColumns:{totalColumns}">
+			<div class="url-listings__headers url-parameters url-listings__section">
 				<!-- Headers -->
-				<h3>Index</h3>
-				{#each Object.values(builderFields) as {label}}
-					<h3>{label}</h3>
-				{/each}
-				{#each Object.values(entries) as {index, values}}
-				<div class="url-index">{index}</div>
-					<UrlGroup entryKey={index} prefix={conf.UrlBuilder?.prefix} inputs={builderFields} values={values} on:urlUpdated={urlUpdated}></UrlGroup>
-				{/each}
-				<div>
-					<button type="button" on:click={addNewRow}>+</button>
+				<div class="index-column">
+					<h3>URL</h3>
+					<h2>{activeIndex}</h2>				
+				</div>
+				<div class="configuration">
+					<UrlGroup 
+						entryKey={activeIndex} 
+						prefix={conf.UrlBuilder?.prefix} 
+						inputs={builderFields} 
+						showLabel=true
+						values={entries[activeIndex]?.values} 
+						on:urlUpdated={urlUpdated}></UrlGroup>
 				</div>
 			</div>
 		</div>
 		<div class="url-list__header">
 			<div><h2>URLs</h2></div>
-			<button on:click={() => { downloadFile("entries") }}>Export</button>
 		</div>
 		<div class="url-listings__section outputs">
 			{#each Object.values(entries) as { index, url }}
 				<button on:click={(e) => { removeRow(index) }}>-</button>
-				<div class="url-index">{index}</div>
+				<div class="url-index" on:click={() => activeIndex = index } class:active={activeIndex === index}>{index}</div>
 				<input type="text" disable class="url-output" value="{url}" />
 			{/each}
 		</div>
+		<ViewSelect on:viewChanged selectedPage="detail" />
 	{/await}
 </main>
 

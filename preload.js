@@ -8,9 +8,6 @@ ipcRenderer.on(`configuration-loaded`, (e, conf) => {
 contextBridge.exposeInMainWorld('eapi', {
     getConfig: () => ipcRenderer.invoke('load-configuration'),
     updateConfig: (conf) => ipcRenderer.invoke('configuration-updated', conf), 
-    sortConfig: (c) => {
-        c.CampaignDetails.Inputs = Object.fromEntries(Object.entries(c.CampaignDetails.Inputs).sort(([,a],[,b]) => a.index - b.index))
-    },
     setUploadPath: (fileName, path) => ipcRenderer.invoke('set-file-upload', fileName, path, config),
     entries: (entries) => {
         if (entries) {

@@ -1,9 +1,9 @@
 <script>
     import Input from '../../form/Input.svelte';
     import Select from '../../form/Select.svelte';
-    import AddInput from '../../form/AddInput.svelte';
     import Options from '../../form/Options.svelte';
-    import { removeOption, addNewOption, handleOptsKeyUpdate, handleOptsValueUpdate } from '../../lib/utils';
+    import UtilityBar from '../../form/UtilityBar.svelte';
+    import { removeOption, addNewOption, handleOptsKeyUpdate, handleOptsValueUpdate, sortObject } from '../../lib/utils';
 
     let config;
     let inputs;
@@ -90,14 +90,14 @@
         inputs = config.UrlBuilder.inputs;
     })
 
+    const sortEntries = (() => config.UrlBuilder.inputs = sortObject(config.UrlBuilder.inputs))
+
     // May convert to utility function
     const debounceWrapper = function(timer, cb, time) {
         clearTimeout(timer);
         cb();
         updateDebounce = setTimeout(() => {
-            window.eapi.sortConfig(config);
 
-            // TODO: Figure out redraw while updating index
             inputs = config.UrlBuilder.inputs;
             window.eapi.updateConfig(config)
                 .then(updated => { 
@@ -191,7 +191,11 @@
                 <button class="btn-remove" on:click={() => removeInput(key)}>Remove</button>
             </fieldset>
         {/each}
-        <AddInput on:newItemAdded={(e) => addNewParameter(e.detail.type)} />
+        <UtilityBar 
+            configPage={true}
+            on:sortItems={(e) => debounceAndUpdate(() => sortEntries())}
+            on:newItemAdded={(e) => addNewParameter(e.detail.type)}>
+        </UtilityBar>
     {/await}
 </main>
 
@@ -202,18 +206,6 @@
         border-radius: 4px;
         float:right;
         color: #fff;
-    }
-
-    .btn-add {
-        width: 25%;
-        background-color: slategray;
-        color: white;
-        border-radius: 4px;
-    }
-
-    .option-listing, .options-listing__header {
-        display: grid;
-        grid-template-columns: 3fr 3fr 1fr;
-        column-gap: 1rem;
+        margin-top: 1rem;
     }
 </style>

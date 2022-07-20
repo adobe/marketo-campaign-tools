@@ -36,4 +36,10 @@
         display: grid;
         grid-template-columns: 2fr 1fr;
     }
+
+    .btn-add {
+        background-color: slategray;
+        color: white;
+        border-radius: 4px;
+    }
 </style>
