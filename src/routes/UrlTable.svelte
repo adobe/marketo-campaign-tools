@@ -9,6 +9,8 @@
 	
 	let entries = {};
 	let totalColumns;
+
+	let indicesToRemove = [];
 	
 	const init = (async () => {
 		conf = await window.eapi.getConfig();
@@ -23,7 +25,15 @@
 	// Functions
 	const addNewRow = () => {
 		let nextIndex = Object.keys(entries).length + 1;
-		entries[nextIndex.toString()] = {index: nextIndex };
+		let entry = {
+			index: nextIndex,
+			url: '',
+			values: {}
+		};
+		Object.keys(builderFields).forEach((key) => {
+			entry.values[key] = '';
+		});
+		entries[nextIndex.toString()] = entry;
 	}
 
 	const removeRow = (index) => {
@@ -124,6 +134,19 @@
 	.url-list__header button {
 		margin-bottom: 0;
 	}
+
+	.full-span {
+		grid-column: span 3;
+		margin: 1rem;	
+	}
+
+	.full-span__url-list {
+		grid-column: span 6;
+	}
+
+	.full-span__url-list button {
+		width: 100%;
+	}
 </style>
 
 <main>
@@ -141,8 +164,8 @@
 					<div class="url-index">{index}</div>
 					<UrlGroup entryKey={index} prefix={conf.UrlBuilder?.prefix} inputs={builderFields} values={values} on:urlUpdated={urlUpdated}></UrlGroup>
 				{/each}
-				<div>
-					<button type="button" on:click={addNewRow}>+</button>
+				<div class="full-span full-span__url-list">
+					<button type="button" class="secondary" on:click={addNewRow}>Add Row</button>
 				</div>
 			</div>
 		</div>
@@ -155,6 +178,7 @@
 				<div class="url-index">{index}</div>
 				<input type="text" disable class="url-output" value="{url}" />
 			{/each}
+			<button class="full-span secondary" type="button" on:click={addNewRow}>Add Row</button>
 		</div>
 		<ViewSelect on:viewChanged selectedPage="table" />
 	{/await}

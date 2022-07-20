@@ -26,7 +26,7 @@
             ]}
             value={selectedPage}
         />
-        <button on:click={() => { downloadFile("entries") }}>Export URL List</button>
+        <button class="secondary" on:click={() => { downloadFile("entries") }}>Export URL List</button>
     </div>
 </UtilityBar>
 

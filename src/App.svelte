@@ -283,6 +283,12 @@
 		margin-bottom: 2rem;
 	}
 
+	:global(button.secondary) {
+        background-color: slategray; 
+        color: white;
+        border-radius: 4px;
+    }
+
 	@media (max-width: 640px) {
 		:global(.cmp-input) {
 			grid-template-columns: 1fr;
