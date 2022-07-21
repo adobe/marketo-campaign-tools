@@ -1,6 +1,7 @@
 {
   "name": "marketo-reporting-framework-toolkit",
-  "version": "0.2.0",
+  "productName": "Marketo Toolkit",
+  "version": "1.0.0",
   "private": true,
   "main": "index.js",
   "scripts": {
@@ -11,7 +12,9 @@
     "debug": "yarn build && electron-forge start --inspect-electron",
     "dist": "yarn build && electron-builder",
     "package": "electron-forge package",
-    "make": "electron-forge make"
+    "make": "electron-forge make",
+    "make-mac": "electron-forge make --platform darwin",
+    "make-win": "electron-forge make --platform win32"
   },
   "devDependencies": {
     "@electron-forge/cli": "^6.0.0-beta.63",
@@ -37,7 +40,9 @@
   },
   "config": {
     "forge": {
-      "packagerConfig": {},
+      "packagerConfig": {
+        "icon": "./assets/icon"
+      },
       "makers": [
         {
           "name": "@electron-forge/maker-zip",

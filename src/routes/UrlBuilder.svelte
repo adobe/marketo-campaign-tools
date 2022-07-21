@@ -139,10 +139,6 @@
 		display: grid;
 	}
 
-	.url-list__header button {
-		margin-bottom: 0;
-	}
-
 	.url-index.active {
 		background-color: red;
 		color: white;

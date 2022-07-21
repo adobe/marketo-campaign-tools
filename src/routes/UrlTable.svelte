@@ -131,10 +131,6 @@
 		display: grid;
 	}
 
-	.url-list__header button {
-		margin-bottom: 0;
-	}
-
 	.full-span {
 		grid-column: span 3;
 		margin: 1rem;	
