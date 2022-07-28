@@ -1,7 +1,7 @@
 {
   "name": "marketo-reporting-framework-toolkit",
   "productName": "Marketo Toolkit",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "main": "index.js",
   "scripts": {
@@ -57,7 +57,7 @@
           "name": "@electron-forge/maker-squirrel",
           "config": {
             "name": "marketo-toolkit",
-            "author": "Douglas Ross", 
+            "author": "Douglas Ross",
             "description": "A toolkit to support Marketo customers in creating and managing their campaign names and related URLs"
           },
           "platforms": [
@@ -66,8 +66,12 @@
         }
       ],
       "make_targets": {
-        "win32": ["squirrel"], 
-        "darwin": ["dmg"]
+        "win32": [
+          "squirrel"
+        ],
+        "darwin": [
+          "dmg"
+        ]
       }
     }
   }
