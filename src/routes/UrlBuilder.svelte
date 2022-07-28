@@ -69,6 +69,42 @@
 	})
 </script>
 
+<main>
+	{#await configurationLoaded}
+		<div>Loading...</div>
+	{:then}
+		<div class="url-listings">
+			<div class="url-listings__headers url-parameters url-listings__section">
+				<!-- Headers -->
+				<div class="index-column">
+					<h3>URL</h3>
+					<h2>{activeIndex}</h2>				
+				</div>
+				<div class="configuration">
+					<UrlGroup 
+						entryKey={activeIndex} 
+						prefix={conf.UrlBuilder?.prefix} 
+						inputs={builderFields} 
+						showLabel=true
+						values={entries[activeIndex]?.values} 
+						on:urlUpdated={urlUpdated}></UrlGroup>
+				</div>
+			</div>
+		</div>
+		<div class="url-list__header">
+			<div><h2>URLs</h2></div>
+		</div>
+		<div class="url-listings__section outputs">
+			{#each Object.values(entries) as { index, url }}
+				<button on:click={(e) => { removeRow(index) }}>-</button>
+				<div class="url-index" on:click={() => activeIndex = index } class:active={activeIndex === index}>{index}</div>
+				<input type="text" disable class="url-output" value="{url}" />
+			{/each}
+		</div>
+		<ViewSelect on:viewChanged selectedPage="detail" />
+	{/await}
+</main>
+
 <style>
 	.url-parameters {
 		display: grid;
@@ -112,6 +148,10 @@
 		grid-template-columns: 1fr 1fr 13fr;
 	}
 
+	.url-listings__section.outputs button {
+		margin: 0.25rem; 
+	}
+
 	:global(.url-listings__section.outputs input) {
 		border: none;
 		border-bottom: 1px solid #ccc;
@@ -145,40 +185,4 @@
 		font-weight: bold;
 	}
 </style>
-
-<main>
-	{#await configurationLoaded}
-		<div>Loading...</div>
-	{:then}
-		<div class="url-listings">
-			<div class="url-listings__headers url-parameters url-listings__section">
-				<!-- Headers -->
-				<div class="index-column">
-					<h3>URL</h3>
-					<h2>{activeIndex}</h2>				
-				</div>
-				<div class="configuration">
-					<UrlGroup 
-						entryKey={activeIndex} 
-						prefix={conf.UrlBuilder?.prefix} 
-						inputs={builderFields} 
-						showLabel=true
-						values={entries[activeIndex]?.values} 
-						on:urlUpdated={urlUpdated}></UrlGroup>
-				</div>
-			</div>
-		</div>
-		<div class="url-list__header">
-			<div><h2>URLs</h2></div>
-		</div>
-		<div class="url-listings__section outputs">
-			{#each Object.values(entries) as { index, url }}
-				<button on:click={(e) => { removeRow(index) }}>-</button>
-				<div class="url-index" on:click={() => activeIndex = index } class:active={activeIndex === index}>{index}</div>
-				<input type="text" disable class="url-output" value="{url}" />
-			{/each}
-		</div>
-		<ViewSelect on:viewChanged selectedPage="detail" />
-	{/await}
-</main>
 

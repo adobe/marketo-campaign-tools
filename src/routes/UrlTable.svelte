@@ -77,6 +77,41 @@
 	})
 </script>
 
+<main>
+	{#await configurationLoaded}
+		<div>Loading...</div>
+	{:then}
+		<div class="url-listings">
+			<div class="url-parameters url-listings__section" style="--totalColumns:{totalColumns}">
+				<!-- Headers -->
+				<h3>Index</h3>
+				{#each Object.values(builderFields) as {label}}
+					<h3>{label}</h3>
+				{/each}
+				{#each Object.values(entries) as {index, values}}
+					<div class="url-index">{index}</div>
+					<UrlGroup entryKey={index} prefix={conf.UrlBuilder?.prefix} inputs={builderFields} values={values} on:urlUpdated={urlUpdated}></UrlGroup>
+				{/each}
+				<div class="full-span__parameter-list">
+					<button type="button" class="secondary" on:click={addNewRow}>Add Row</button>
+				</div>
+			</div>
+		</div>
+		<div class="url-list__header">
+			<div><h2>URLs</h2></div>
+		</div>
+		<div class="url-listings__section outputs">
+			{#each Object.values(entries) as { index, url }}
+				<button on:click={(e) => { removeRow(index) }}>-</button>
+				<div class="url-index">{index}</div>
+				<input type="text" readonly class="url-output" value="{url}" />
+			{/each}
+			<button class="full-span__url-list secondary" type="button" on:click={addNewRow}>Add Row</button>
+		</div>
+		<ViewSelect on:viewChanged selectedPage="table" />
+	{/await}
+</main>
+
 <style>
 	.url-parameters {
 		display: grid;
@@ -84,29 +119,35 @@
 		column-gap: 1rem;
 	}
 
-	.url-listings {
-		display: grid;
-		grid-template-columns: 1fr;
-		width: 75vw;
-	}
-	
-	.url-listings__headers > h3 {
+	.url-parameters > h3 {
 		border-left: 1px solid grey;
 		display: grid;
 		align-items: center;
 		font-size: 0.9em;
 		padding-left: 0.5rem;
+		row-gap: 0.25rem;
+	}
+	
+	.url-listings {
+		display: grid;
+		grid-template-columns: 1fr;
+		width: 75vw;
 	}
 
 	.url-listings__section.outputs {
 		display: grid;
-		grid-template-columns: 1fr 1fr 13fr;
+		grid-template-columns: 5% 5% 1fr;
 		padding-bottom: 3rem;
+		row-gap: 0.25rem;
 	}
 
 	:global(.url-listings__section.outputs input) {
 		border: none;
 		border-bottom: 1px solid #ccc;
+	}
+
+	.url-listings__section.outputs button {
+		margin: 0.25rem; 
 	}
 
 	.url-index {
@@ -131,52 +172,17 @@
 		display: grid;
 	}
 
-	.full-span {
+	.full-span__url-list {
 		grid-column: span 3;
 		margin: 1rem;	
 	}
 
-	.full-span__url-list {
-		grid-column: span 6;
+	.full-span__parameter-list {
+		grid-column: span calc(var(--totalColumns) + 1);
 	}
 
-	.full-span__url-list button {
+	.full-span__parameter-list button {
 		width: 100%;
 	}
 </style>
-
-<main>
-	{#await configurationLoaded}
-		<div>Loading...</div>
-	{:then}
-		<div class="url-listings">
-			<div class="url-listings__headers url-parameters url-listings__section" style="--totalColumns:{totalColumns}">
-				<!-- Headers -->
-				<h3>Index</h3>
-				{#each Object.values(builderFields) as {label}}
-					<h3>{label}</h3>
-				{/each}
-				{#each Object.values(entries) as {index, values}}
-					<div class="url-index">{index}</div>
-					<UrlGroup entryKey={index} prefix={conf.UrlBuilder?.prefix} inputs={builderFields} values={values} on:urlUpdated={urlUpdated}></UrlGroup>
-				{/each}
-				<div class="full-span full-span__url-list">
-					<button type="button" class="secondary" on:click={addNewRow}>Add Row</button>
-				</div>
-			</div>
-		</div>
-		<div class="url-list__header">
-			<div><h2>URLs</h2></div>
-		</div>
-		<div class="url-listings__section outputs">
-			{#each Object.values(entries) as { index, url }}
-				<button on:click={(e) => { removeRow(index) }}>-</button>
-				<div class="url-index">{index}</div>
-				<input type="text" disable class="url-output" value="{url}" />
-			{/each}
-			<button class="full-span secondary" type="button" on:click={addNewRow}>Add Row</button>
-		</div>
-		<ViewSelect on:viewChanged selectedPage="table" />
-	{/await}
-</main>
 

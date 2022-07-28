@@ -6,6 +6,9 @@ const { constants, createWriteStream } = require('fs');
 const { format } = require('@fast-csv/format');
 const DefaultConfig = require('./defaultConfig');
 
+// Specific bit of code to handle squirrel startup on Windows
+if(require('electron-squirrel-startup')) return;
+
 let userConfigPath = path.join(os.homedir(),".marketo-toolkit");
 let configPath;
 
