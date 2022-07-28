@@ -1,6 +1,5 @@
 <script>
     import { createEventDispatcher } from 'svelte';
-    import { sort } from '../lib/utils';
     import Select from './Select.svelte';
     import Input from './Input.svelte';
     import Date from './Date.svelte'
@@ -77,7 +76,7 @@
 
 {#each Object.keys(inputs) as key }
     {#if showLabel}
-        <label>{inputs[key].label}</label>
+        <label for="{key}">{inputs[key].label}</label>
     {/if}
     {#if inputs[key].type === "select"}
         <Select 
@@ -110,7 +109,4 @@
 {/each}
 
 <style>
-    input {
-        width: 100%;
-    }
 </style>

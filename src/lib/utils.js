@@ -77,3 +77,21 @@ export const removeSub = ((ref, inputs, k, s) => {
 });
 
 export const sortObject = ((obj) => Object.fromEntries(Object.entries(obj).sort(([,a],[,b]) => a.index - b.index)));
+
+// --------- URL Tables / Detail Handling ---------
+
+export const addNewRow = (entries, builderFields) => {
+    
+    let nextIndex = Object.keys(entries).length + 1;
+    let entry = {
+        index: nextIndex,
+        url: '',
+        values: {}
+    };
+    Object.keys(builderFields).forEach((key) => {
+        entry.values[key] = '';
+    });
+    entries[nextIndex.toString()] = entry;
+    
+    return entries;
+}

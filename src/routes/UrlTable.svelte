@@ -1,6 +1,6 @@
 <script>
 	// let config = window.eapi.getConfig();
-	import { sortObject } from '../lib/utils';
+	import { sortObject, addNewRow } from '../lib/utils';
 	import UrlGroup from '../form/UrlGroup.svelte';
 	import ViewSelect from '../form/ViewSelect.svelte';
 
@@ -9,8 +9,7 @@
 	
 	let entries = {};
 	let totalColumns;
-
-	let indicesToRemove = [];
+	let activeIndex;
 	
 	const init = (async () => {
 		conf = await window.eapi.getConfig();
@@ -23,18 +22,6 @@
 	let configurationLoaded = init();
 
 	// Functions
-	const addNewRow = () => {
-		let nextIndex = Object.keys(entries).length + 1;
-		let entry = {
-			index: nextIndex,
-			url: '',
-			values: {}
-		};
-		Object.keys(builderFields).forEach((key) => {
-			entry.values[key] = '';
-		});
-		entries[nextIndex.toString()] = entry;
-	}
 
 	const removeRow = (index) => {
 		delete entries[index.toString()];
@@ -89,12 +76,9 @@
 					<h3>{label}</h3>
 				{/each}
 				{#each Object.values(entries) as {index, values}}
-					<div class="url-index">{index}</div>
+					<div class="url-index" class:active={activeIndex === index}>{index}</div>
 					<UrlGroup entryKey={index} prefix={conf.UrlBuilder?.prefix} inputs={builderFields} values={values} on:urlUpdated={urlUpdated}></UrlGroup>
 				{/each}
-				<div class="full-span__parameter-list">
-					<button type="button" class="secondary" on:click={addNewRow}>Add Row</button>
-				</div>
 			</div>
 		</div>
 		<div class="url-list__header">
@@ -103,12 +87,14 @@
 		<div class="url-listings__section outputs">
 			{#each Object.values(entries) as { index, url }}
 				<button on:click={(e) => { removeRow(index) }}>-</button>
-				<div class="url-index">{index}</div>
+				<div class="url-index" on:click={() => activeIndex = index } class:active={activeIndex === index}>{index}</div>
 				<input type="text" readonly class="url-output" value="{url}" />
 			{/each}
-			<button class="full-span__url-list secondary" type="button" on:click={addNewRow}>Add Row</button>
 		</div>
-		<ViewSelect on:viewChanged selectedPage="table" />
+		<ViewSelect 
+			on:viewChanged selectedPage="table" 
+			on:addNewRow={() => entries = addNewRow(entries, builderFields)}
+		/>
 	{/await}
 </main>
 
@@ -172,17 +158,10 @@
 		display: grid;
 	}
 
-	.full-span__url-list {
-		grid-column: span 3;
-		margin: 1rem;	
-	}
-
-	.full-span__parameter-list {
-		grid-column: span calc(var(--totalColumns) + 1);
-	}
-
-	.full-span__parameter-list button {
-		width: 100%;
+	.url-index.active {
+		background-color: red;
+		color: white;
+		font-weight: bold;
 	}
 </style>
 

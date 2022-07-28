@@ -26,6 +26,7 @@
             ]}
             value={selectedPage}
         />
+        <button class="primary" type="button" on:click={() => dispatch("addNewRow", {})}>Add Row</button>
         <button class="secondary" on:click={() => { downloadFile("entries") }}>Export URL List</button>
     </div>
 </UtilityBar>
@@ -33,7 +34,8 @@
 <style>
     .utility-bar--content {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 2fr 1fr 1fr;
+        column-gap: 1rem;
         padding: 0 2rem;
     }
 </style>

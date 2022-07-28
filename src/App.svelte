@@ -283,6 +283,12 @@
 		margin-bottom: 2rem;
 	}
 
+	:global(button.primary) {
+        background-color: red; 
+        color: white;
+        border-radius: 4px;
+    }
+
 	:global(button.secondary) {
         background-color: slategray; 
         color: white;

@@ -1,6 +1,6 @@
 <script>
 	// let config = window.eapi.getConfig();
-	import { sortObject } from '../lib/utils';
+	import { sortObject, addNewRow } from '../lib/utils';
 	import UrlGroup from '../form/UrlGroup.svelte';
 	import ViewSelect from '../form/ViewSelect.svelte';
 
@@ -23,9 +23,9 @@
 	let configurationLoaded = init();
 
 	// Functions
-	const addNewRow = () => {
-		let nextIndex = Object.keys(entries).length + 1;
-		entries[nextIndex.toString()] = {index: nextIndex };
+	const addRow = () => {
+		entries = addNewRow(entries, builderFields);
+		activeIndex = Object.keys(entries).length;
 	}
 
 	const removeRow = (index) => {
@@ -101,7 +101,10 @@
 				<input type="text" disable class="url-output" value="{url}" />
 			{/each}
 		</div>
-		<ViewSelect on:viewChanged selectedPage="detail" />
+		<ViewSelect 
+			on:viewChanged selectedPage="detail" 
+			on:addNewRow={addRow}
+		/>
 	{/await}
 </main>
 
@@ -146,6 +149,8 @@
 	.url-listings__section.outputs {
 		display: grid;
 		grid-template-columns: 1fr 1fr 13fr;
+		padding-bottom: 3rem;
+		row-gap: 0.25rem;
 	}
 
 	.url-listings__section.outputs button {
