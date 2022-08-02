@@ -3,12 +3,14 @@
 
     let files;
     let config = {};
+    let configurationOutput;
 
     const init = (async() => {
         config = await window.eapi.getConfig();
         if (config.configPath) {
             console.log("Loaded configuration");
             files = [config.configPath];
+            configurationOutput = JSON.stringify(config, null, 2)
         }
         return true
     })
@@ -16,7 +18,14 @@
     let initialization = init();
 
     const setFileToUpload = () => {
-        window.eapi.setUploadPath(files[0].name, files[0].path);
+        window.eapi.setUploadPath(files[0].name, files[0].path)
+            .then(conf => {
+                config = conf;
+                configurationOutput = JSON.stringify(config, null, 2)
+            })
+            .catch(err => {
+                console.log(err);
+            });
     }
 </script>
 <main>
@@ -31,7 +40,7 @@
                 <b>Currently loaded file:</b> {files ? files[0] : "No configuration specified"}
             </div>
             <pre>
-                {JSON.stringify(config, null, 2)}
+                {configurationOutput}
             </pre>
         </form> 
     {/await}

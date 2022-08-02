@@ -137,28 +137,29 @@ ipcMain.handle('load-configuration', async(e) => {
 })
 
 ipcMain.handle('set-file-upload', async (e, fileName, path) => {
+    return new Promise((resolve, reject) => {
+        console.log(`File to upload would be ${path} with name ${fileName}`);
+        createLocalConfig({configPath: path, updated: new Date()});
 
-    console.log(`File to upload would be ${path} with name ${fileName}`);
-    createLocalConfig({configPath: path, updated: new Date()});
-
-    fs.open(path).then(fh => {
-        fh.readFile("utf-8")
-            .then(contents => {
-                let conf = JSON.parse(contents);
-                console.log(`Setting configuration to ${JSON.stringify(conf, 2)}`);
-                return conf;
-            })
-            .catch((err) => { 
-                console.error(err);
-                return {}; 
-            })
-            .finally(() => {
-                fh.close();
-            })
-    })
-    .catch((err) => {
-        console.error(`Error while attempting to open ${path}`);
-        reject(err);
+        fs.open(path).then(fh => {
+            fh.readFile("utf-8")
+                .then(contents => {
+                    let conf = JSON.parse(contents);
+                    console.log(`Setting configuration to ${JSON.stringify(conf, 2)}`);
+                    resolve(conf);
+                })
+                .catch((err) => { 
+                    console.error(err);
+                    reject(err) 
+                })
+                .finally(() => {
+                    fh.close();
+                })
+        })
+        .catch((err) => {
+            console.error(`Error while attempting to open ${path}`);
+            reject(err);
+        })
     })
 });
 
