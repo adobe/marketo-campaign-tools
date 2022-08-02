@@ -65,8 +65,9 @@ const sortConfigInputs = (config) => {
 }
    
 
-const openUserConfig = () => {
-    return fs.readFile(userConfigPath, 'utf-8');
+const openUserConfig = async (asJson = false) => {
+    let contents = await fs.readFile(userConfigPath, 'utf-8')
+    return asJson === true ? JSON.parse(contents) : contents;
 }
 
 const loadConfiguration = async (fn) => {
@@ -75,8 +76,7 @@ const loadConfiguration = async (fn) => {
     let exists = true;
 
     try {
-        let contents = await openUserConfig(); 
-        let conf = JSON.parse(contents);
+        let conf = await openUserConfig(true); 
         configPath = conf.configPath;
         let fh = await fs.open(conf.configPath);
         let fileContents = await fh.readFile("utf-8"); 
@@ -191,6 +191,21 @@ ipcMain.handle('create-url-exports', async (e, entries, campaignName) => {
 
 ipcMain.handle('create-config-export', async () => {
     return configPath;
+})
+
+ipcMain.handle('reset-configuration', async () => {
+    let conf = await openUserConfig(true);
+    return new Promise((resolve, reject) => {
+        fs.unlink(conf.configPath)
+            .then(() => {
+                fs.unlink(conf.userConfigPath)
+                    .then(() => {
+                        loadConfiguration((configuration) => resolve(configuration));
+                    })
+                    .catch(err => reject(err))
+            })
+            .catch(err => reject(err))
+    })
 })
 
 app.whenReady().then(() => {

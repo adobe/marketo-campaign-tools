@@ -19,5 +19,6 @@ contextBridge.exposeInMainWorld('eapi', {
         }
     }, 
     exportEntries: () => ipcRenderer.invoke('create-url-exports', config.UrlBuilder.entries, config.CampaignDetails.name),
-    exportConfig: () => ipcRenderer.invoke('create-config-export')
+    exportConfig: () => ipcRenderer.invoke('create-config-export'),
+    reset: () => ipcRenderer.invoke('reset-configuration')
 });
