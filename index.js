@@ -60,7 +60,6 @@ const updateConfiguration = async (config) => {
     }
 }
 
-// TODO: Let this logic be on the client-side
 const sortConfigInputs = (config) => {
     config.CampaignDetails.Inputs = Object.fromEntries(Object.entries(config.CampaignDetails.Inputs).sort(([,a],[,b]) => a.index - b.index))
 }
@@ -70,7 +69,6 @@ const openUserConfig = () => {
     return fs.readFile(userConfigPath, 'utf-8');
 }
 
-// TODO: Test this against empty configruations (local user and toolkit level)
 const loadConfiguration = async (fn) => {
 
     let configJson;
@@ -165,20 +163,29 @@ ipcMain.handle('set-file-upload', async (e, fileName, path) => {
 });
 
 ipcMain.handle('create-url-exports', async (e, entries, campaignName) => {
-    let filePath = path.join(os.tmpdir(), 'excel-exports.csv')
-    let exportFile = createWriteStream(filePath);
-    const stream = format({headers: true });
-    stream.pipe(exportFile);
-    Object.values(entries).forEach((entry) => {
-        let row = {}
-        row.campaignName = campaignName;
-        Object.assign(row, entry.values);
-        row.url = entry.url;
-    
-        stream.write(row);
-    });
-    stream.end();
-    return filePath;
+    return new Promise((resolve, reject) => {
+        try {
+            let filePath = path.join(os.tmpdir(), 'url-exports.csv')
+            let exportFile = createWriteStream(filePath);
+            const stream = format({headers: true });
+            stream.pipe(exportFile);
+            Object.values(entries).forEach((entry) => {
+                let row = {}
+                row.campaignName = campaignName;
+                Object.assign(row, entry.values);
+                row.url = entry.url;
+            
+                stream.write(row);
+            });
+            stream.end(undefined, undefined, () => {
+                resolve(filePath);
+            });
+        } catch (err) {
+            console.log(`%cError while attempting to create exports`, "color: #f00");
+            console.log(err);
+            reject(err);
+        }
+    })
 })
 
 ipcMain.handle('create-config-export', async () => {

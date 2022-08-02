@@ -15,7 +15,11 @@ export const downloadFile = async (file) => {
     fn()
         .then((result) => {
             console.log(`Received ${result}`);
-            window.open(result);
+            // window.open(result);
+            let a = document.createElement('a');
+            a.href = result;
+            a.download = file === "entries" ? "url-exports.csv" : "configuration-export.json";
+            a.click();
         })
         .catch(err => console.log(err));
 }

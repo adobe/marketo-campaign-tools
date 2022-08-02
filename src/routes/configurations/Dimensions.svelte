@@ -104,7 +104,6 @@ const debounceWrapper = function(timer, cb, time) {
     cb();
     updateDebounce = setTimeout(() => {
 
-        // TODO: Figure out redraw while updating index
         inputs = config.CampaignDetails.Inputs;
         window.eapi.updateConfig(config)
 			.then(updated => { 

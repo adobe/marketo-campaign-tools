@@ -11,7 +11,6 @@
 
 	// Import icons
 	import Icon from './icons/Icon.svelte';
-	import Link from './icons/link.svelte';
 	import Links from './icons/links.svelte';
 	import Puzzle from './icons/puzzle.svelte';
 	import Dimension from './icons/dimensions.svelte';
