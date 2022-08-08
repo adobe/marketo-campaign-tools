@@ -81,10 +81,50 @@ export const removeSub = ((ref, inputs, k, s) => {
 
 export const sortObject = ((obj) => Object.fromEntries(Object.entries(obj).sort(([,a],[,b]) => a.index - b.index)));
 
+// --------- Configuration: Add New Input ---------
+
+export const addNewInput = (typeToAdd, includePlaceholder = true, index = 0) => {
+    let input =  {
+        "label": "",
+        "index": index,
+        "tooltip": "" 
+    }
+
+    if (includePlaceholder) {
+        input.placeholder = "";
+    }
+
+    switch (typeToAdd) {
+        case "input": 
+            input.subs = {"sub1":"val1"}
+            input.type = "input";
+            break;
+        case "select": 
+            input.options = [{
+                "label": "Option 1", 
+                "value": "Value 1"
+            }]
+            input.type = "select";
+            break;
+        case "date": 
+            input.type = "date";
+            break;
+    }
+    
+    return input; 
+}
+
+export const findNextAvailableIndex = (inputs) => {
+    let indicies = Object.values(inputs).map((input) => {
+        return input.index;
+    })
+    indicies.sort((a, b) => b - a);
+    return new Number(indicies[0]) + 1;
+}
+
 // --------- URL Tables / Detail Handling ---------
 
 export const addNewRow = (entries, builderFields) => {
-    
     let nextIndex = Object.keys(entries).length + 1;
     let entry = {
         index: nextIndex,

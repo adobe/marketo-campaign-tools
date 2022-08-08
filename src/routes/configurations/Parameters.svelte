@@ -3,7 +3,14 @@
     import Select from '../../form/Select.svelte';
     import Options from '../../form/Options.svelte';
     import UtilityBar from '../../form/UtilityBar.svelte';
-    import { removeOption, addNewOption, handleOptsKeyUpdate, handleOptsValueUpdate, sortObject } from '../../lib/utils';
+    import { 
+        removeOption, 
+        addNewOption, 
+        handleOptsKeyUpdate, 
+        handleOptsValueUpdate, 
+        sortObject, 
+        addNewInput,
+        findNextAvailableIndex } from '../../lib/utils';
 
     let config;
     let inputs;
@@ -43,34 +50,6 @@
         inputs[key] = input;
         config.UrlBuilder.inputs = inputs;
     })
-    
-    // ----- Add / Remove Parameter Handling -----
-    const addNewParameter = (typeToAdd) => {
-        let input =  {
-            "label": "",
-            "index": 0,
-            "tooltip": "" 
-        }
-
-        switch (typeToAdd) {
-            case "input": 
-                input.subs = {"sub1":"val1"}
-                input.type = "input";
-                break;
-            case "select": 
-                input.options = [{
-                    "label": "Option 1", 
-                    "value": "Value 1"
-                }]
-                input.type = "select";
-                break;
-            case "date": 
-                input.type = "date";
-                break;
-        }
-        
-        inputs["newDimension"] = input; 
-    }
 
     const removeInput = (key) => {
         delete inputs[key];
@@ -194,7 +173,7 @@
         <UtilityBar 
             configPage={true}
             on:sortItems={(e) => debounceAndUpdate(() => sortEntries())}
-            on:newItemAdded={(e) => addNewParameter(e.detail.type)}>
+            on:newItemAdded={(e) => inputs["newParamater"] = addNewInput(e.detail.type, false, findNextAvailableIndex(inputs))}>
         </UtilityBar>
     {/await}
 </main>
