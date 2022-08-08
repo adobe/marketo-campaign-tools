@@ -87,7 +87,7 @@ const loadConfiguration = async (fn) => {
     let exists = true;
 
     try {
-        configJson = getConfiguration(true);
+        configJson = await getConfiguration(true);
     } catch (err) {
         console.log(`Error while attempting to retrieve configuration, creating default`);
         configJson = DefaultConfig;
