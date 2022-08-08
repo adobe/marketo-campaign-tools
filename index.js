@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const os = require('os');
 const fs = require('fs/promises');
@@ -65,9 +65,20 @@ const sortConfigInputs = (config) => {
 }
    
 
-const openUserConfig = async (asJson = false) => {
+const openUserSettings = async (asJson = false) => {
     let contents = await fs.readFile(userConfigPath, 'utf-8')
     return asJson === true ? JSON.parse(contents) : contents;
+}
+
+const getConfiguration = async(asJson = false) => {
+    let conf = await openUserSettings(true); 
+    // This is set at application level
+    configPath = conf.configPath;
+    let fh = await fs.open(conf.configPath);
+    let fileContents = await fh.readFile("utf-8"); 
+    fh.close();
+
+    return asJson ? JSON.parse(fileContents) : fileContents;
 }
 
 const loadConfiguration = async (fn) => {
@@ -76,12 +87,7 @@ const loadConfiguration = async (fn) => {
     let exists = true;
 
     try {
-        let conf = await openUserConfig(true); 
-        configPath = conf.configPath;
-        let fh = await fs.open(conf.configPath);
-        let fileContents = await fh.readFile("utf-8"); 
-        configJson = JSON.parse(fileContents);
-        fh.close();
+        configJson = getConfiguration(true);
     } catch (err) {
         console.log(`Error while attempting to retrieve configuration, creating default`);
         configJson = DefaultConfig;
@@ -107,6 +113,48 @@ const loadConfiguration = async (fn) => {
     fn(configJson);
 }
 
+const createUrlExportsFile = async (filePath, config) => {
+
+    return new Promise((resolve, reject) => {
+        console.log("attempting to create file");
+        try {
+            let exportFile = createWriteStream(filePath);
+            const stream = format({headers: true });
+            stream.pipe(exportFile);
+            console.dir(config.UrlBuilder);
+            Object.values(config.UrlBuilder.entries).forEach((entry) => {
+                let row = {}
+                row.campaignName = config.CampaignDetails.name;
+                Object.assign(row, entry.values);
+                row.url = entry.url;
+            
+                stream.write(row);
+            });
+            stream.end(undefined, undefined, () => {
+                resolve(filePath);
+            });
+        } catch (err) {
+            console.log(`%cError while attempting to create exports`, "color: #f00");
+            console.log(err);
+            reject(err);
+        }
+    })
+}
+
+const createConfigFile = async (filePath, config) => {
+    return new Promise((resolve, reject) => {
+        try {
+            let exported = createWriteStream(filePath);
+            exported.write(JSON.stringify(config));
+            exported.end(undefined, undefined, () => {
+                resolve(filePath);
+            });
+        } catch (err) { 
+            reject(err);
+        }
+    })
+}
+
 const createWindow = () => {
 
     const { screen } = require('electron');
@@ -120,10 +168,54 @@ const createWindow = () => {
             preload: path.join(__dirname, 'preload.js')
         }
     });
-
-    loadConfiguration((contentsJson) => {mainWindow.webContents.send('configuration-loaded',contentsJson)});
     
     mainWindow.loadFile(path.join(__dirname, "public/index.html"));
+
+    ipcMain.handle('save-file', async (e, item) => {
+
+        let config = await getConfiguration(true);
+
+        return new Promise((resolve, reject) => {
+
+            let status = {};
+    
+            let saveOpts = { 
+                title: "Save File", 
+                defaultPath: item === "entries" ? `url-exports.csv` : `${config.CampaignDetails.name}.json`, 
+                filters: { extensions: ['csv'] } 
+            }
+            try { 
+                dialog.showSaveDialog(mainWindow, saveOpts)
+                    .then(result => {
+                        if (result.canceled) {
+                            status.cancelled = true;
+                            resolve(status);
+                        }
+        
+                        let fn;
+                        switch (item) {
+                            case 'entries': 
+                                fn = createUrlExportsFile;
+                                break;
+                            case 'config':
+                                fn = createConfigFile;
+                                break;
+                        }
+                        fn(result.filePath, config)
+                            .then(filePath => {
+                                status.path = filePath;
+                                status.status = "success";
+                                resolve(status)
+                            })
+                            .catch(err => reject(err));
+                    })
+                    .catch(err => reject(err));
+            }
+            catch (err) {
+                reject(err);
+            }
+        })
+    })
 };
 
 ipcMain.handle('configuration-updated', async (e, conf) => {
@@ -164,29 +256,7 @@ ipcMain.handle('set-file-upload', async (e, fileName, path) => {
 });
 
 ipcMain.handle('create-url-exports', async (e, entries, campaignName) => {
-    return new Promise((resolve, reject) => {
-        try {
-            let filePath = path.join(os.tmpdir(), 'url-exports.csv')
-            let exportFile = createWriteStream(filePath);
-            const stream = format({headers: true });
-            stream.pipe(exportFile);
-            Object.values(entries).forEach((entry) => {
-                let row = {}
-                row.campaignName = campaignName;
-                Object.assign(row, entry.values);
-                row.url = entry.url;
-            
-                stream.write(row);
-            });
-            stream.end(undefined, undefined, () => {
-                resolve(filePath);
-            });
-        } catch (err) {
-            console.log(`%cError while attempting to create exports`, "color: #f00");
-            console.log(err);
-            reject(err);
-        }
-    })
+    return createUrlExportsFile(path.join(os.tmpdir(), "url-exports.csv"));
 })
 
 ipcMain.handle('create-config-export', async () => {
@@ -194,7 +264,7 @@ ipcMain.handle('create-config-export', async () => {
 })
 
 ipcMain.handle('reset-configuration', async () => {
-    let conf = await openUserConfig(true);
+    let conf = await openUserSettings(true);
     return new Promise((resolve, reject) => {
         fs.unlink(conf.configPath)
             .then(() => {

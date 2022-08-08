@@ -1,5 +1,5 @@
 <script>
-    import { downloadFile } from '../../lib/utils';
+    import { saveFile } from '../../lib/utils';
 
     let files;
     let config = {};
@@ -50,7 +50,7 @@
         <form>
             <input type="file" id="myFile" name="filename" bind:files>
             <button class="upload" type="button" on:click|preventDefault={setFileToUpload}>Upload</button>    
-            <a href="{config.configPath}" disabled={!files} download={`${config.CampaignDetails.name}-config.json`} target="_blank">Download</a>
+            <button class="download" disabled={!files} type="button" on:click|preventDefault={() => saveFile("config")}>Download</button>    
             <button class="reset" type="button" on:click|preventDefault={resetLocalConfig}>Reset Configuration</button>
             <div class="loaded-file">
                 <b>Currently loaded file:</b> {files ? files[0] : "No configuration specified"}

@@ -2,24 +2,10 @@ export const formatDate = (cmp) => {
     return cmp.value;
 }
 
-export const downloadFile = async (file) => {
-    let fn;
-    switch (file) {
-        case "entries":
-            fn = window.eapi.exportEntries;
-            break;
-        case "config": 
-            fn = window.eapi.exportConfig;
-            break;
-    }
-    fn()
-        .then((result) => {
-            console.log(`Received ${result}`);
-            let a = document.createElement('a');
-            a.href = result;
-            a.download = file === "entries" ? "url-exports.csv" : "configuration-export.json";
-            a.click();
-        })
+export const saveFile = async (item) => {
+    console.log(item);
+    window.eapi.saveFile(item)
+        .then(status => console.log(status, null, 2))
         .catch(err => console.log(err));
 }
 

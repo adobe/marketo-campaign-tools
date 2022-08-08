@@ -1,10 +1,5 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
-ipcRenderer.on(`configuration-loaded`, (e, conf) => {
-    config = conf;
-    campaignName = conf.CampaignDetails?.name || '';
-})
-
 contextBridge.exposeInMainWorld('eapi', {
     getConfig: () => ipcRenderer.invoke('load-configuration'),
     updateConfig: (conf) => ipcRenderer.invoke('configuration-updated', conf), 
@@ -18,7 +13,6 @@ contextBridge.exposeInMainWorld('eapi', {
             return conf.UrlBuilder?.entries || {};
         }
     }, 
-    exportEntries: () => ipcRenderer.invoke('create-url-exports', config.UrlBuilder.entries, config.CampaignDetails.name),
-    exportConfig: () => ipcRenderer.invoke('create-config-export'),
-    reset: () => ipcRenderer.invoke('reset-configuration')
+    reset: () => ipcRenderer.invoke('reset-configuration'),
+    saveFile: (item) => ipcRenderer.invoke('save-file', item)
 });
