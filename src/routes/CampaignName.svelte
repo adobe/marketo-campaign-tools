@@ -71,8 +71,7 @@
 		
 		
 		let delimiter = config.Delimiter;
-		console.log(delimiter);
-		let sorted = Array.from(indices).sort();
+		let sorted = Array.from(indices).sort((a, b) => a - b);
 
 		cName = '';
 		sorted.forEach(i => {

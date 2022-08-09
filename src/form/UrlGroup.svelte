@@ -33,13 +33,13 @@
     const updateUrl = () => {
         url = '';
         
-        let sorted = Array.from(indices).sort();
+        let sorted = Array.from(indices).sort((a,b) => a - b);
         let firstParam = true;
 
         sorted.forEach(i => {
             let component = urlComponents.get(i);
             if (component.name == "baseUrl") {
-                url = `${component.value}`;
+                url = component.value;
             } else {
                 url += `${firstParam ? '?' : '&'}${prefix}${component.name}=${component.value}`;
                 firstParam = false;

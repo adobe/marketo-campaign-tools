@@ -3,7 +3,14 @@ import Input from '../../form/Input.svelte';
 import Select from '../../form/Select.svelte';
 import UtilityBar from '../../form/UtilityBar.svelte';
 import Options from '../../form/Options.svelte';
-import { removeOption, addNewOption, handleOptsKeyUpdate, handleOptsValueUpdate, sortObject } from '../../lib/utils';
+import { 
+    removeOption, 
+    addNewOption, 
+    handleOptsKeyUpdate, 
+    handleOptsValueUpdate, 
+    sortObject, 
+    addNewInput,
+    findNextAvailableIndex } from '../../lib/utils';
 
 let config = {};
 let inputs = {};
@@ -65,36 +72,6 @@ const removeInput = ((key) => {
     window.eapi.updateConfig(config)
 			.then(updated => console.log(`Configuration was updated: ${updated}`));
 })
-
-const addNewInput = ((typeToAdd) => {
-     let input =  {
-        "label": "",
-        "placeholder": "",
-        "index": 0,
-        "tooltip": "" 
-    }
-
-    switch (typeToAdd) {
-        case "input": 
-            input.subs = {"sub1":"val1"}
-            input.type = "input";
-            break;
-        case "select": 
-            input.options = [{
-                "label": "Option 1", 
-                "value": "Value 1"
-            }]
-            input.type = "select";
-            break;
-        case "date": 
-            input.type = "date";
-            break;
-
-    }
-    
-    inputs["newDimension"] = input;
-})
-
 
 let updateDebounce;
 
@@ -201,7 +178,7 @@ const sortItems = (() => { config.CampaignDetails.Inputs = sortObject(config.Cam
         {/each}
         <UtilityBar 
             configPage={true}
-            on:newItemAdded={(e) => addNewInput(e.detail.type)}
+            on:newItemAdded={(e) => inputs["newDimension"] = addNewInput(e.detail.type, true, findNextAvailableIndex(inputs))}
             on:sortItems={() => debounceAndUpdate(() => sortItems())}>
         </UtilityBar>
     {/await}

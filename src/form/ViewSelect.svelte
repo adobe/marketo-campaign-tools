@@ -1,6 +1,6 @@
 <script>
     import { createEventDispatcher } from 'svelte';
-    import { downloadFile } from '../lib/utils';
+    import { saveFile } from '../lib/utils';
     import UtilityBar from './UtilityBar.svelte';
     import Select from './Select.svelte';
 
@@ -27,7 +27,7 @@
             value={selectedPage}
         />
         <button class="primary" type="button" on:click={() => dispatch("addNewRow", {})}>Add Row</button>
-        <button class="secondary" on:click={() => { downloadFile("entries") }}>Export URL List</button>
+        <button class="secondary" on:click={() => saveFile("entries")}>Export URL List</button>
     </div>
 </UtilityBar>
 
