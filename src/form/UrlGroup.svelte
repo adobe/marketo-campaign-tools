@@ -39,7 +39,7 @@
         sorted.forEach(i => {
             let component = urlComponents.get(i);
             if (component.name == "baseUrl") {
-                url = `${component.value}${url}`;
+                url = component.value;
             } else {
                 url += `${firstParam ? '?' : '&'}${prefix}${component.name}=${component.value}`;
                 firstParam = false;
