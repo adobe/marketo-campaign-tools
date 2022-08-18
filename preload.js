@@ -3,7 +3,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('eapi', {
     getConfig: () => ipcRenderer.invoke('load-configuration'),
     updateConfig: (conf) => ipcRenderer.invoke('configuration-updated', conf), 
-    setUploadPath: (fileName, path) => ipcRenderer.invoke('set-file-upload', fileName, path, config),
+    setUploadPath: (fileName, path) => ipcRenderer.invoke('set-file-upload', fileName, path),
     entries: (entries) => {
         if (entries) {
             config.UrlBuilder = config.UrlBuilder || {};
