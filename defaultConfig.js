@@ -46,8 +46,7 @@ const defaultConfig = {
             "baseUrl": {
                 "label": "Base URL",
                 "type": "input",
-                "index": 0,
-                "name": "baseUrl"
+                "index": 0
             } 
         }
     }
