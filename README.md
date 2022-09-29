@@ -1,4 +1,4 @@
-# Adobe Marketo Campaign Assistant
+# Adobe Marketo Campaign Tools
 
 This tool is design to assist and facilitate Marketo customers with the creation campaign URLs. In order to most effectively utilize this tool, Marketo customers will need to understand the following primary concepts: 
 

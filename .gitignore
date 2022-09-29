@@ -10,3 +10,6 @@ yarn-error.log
 /dist/
 
 out/
+
+# License tooling
+add-and-check-conf.json
