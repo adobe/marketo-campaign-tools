@@ -100,7 +100,7 @@ governing permissions and limitations under the License.
 <div class="header">
 	<div class="logo">
 		<Icon component={ExperienceCloud} size="small" />
-		Marketo Toolkit
+		Marketo Campaign Tools
 	</div>
 	<div>{#await initalization} No Name {:then} {campaignName} {/await}</div> 
 	<div>{pageName}</div>
