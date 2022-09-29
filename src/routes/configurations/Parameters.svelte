@@ -1,3 +1,14 @@
+<!--
+Copyright 2022 Adobe. All rights reserved.
+This file is licensed to you under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License. You may obtain a copy
+of the License at http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under
+the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+OF ANY KIND, either express or implied. See the License for the specific language
+governing permissions and limitations under the License.
+-->
 <script>
     import Input from '../../form/Input.svelte';
     import Select from '../../form/Select.svelte';
@@ -115,27 +126,6 @@
                             on:OptionAdded={(e) => debounceAndUpdate(() => addNewOption(config.UrlBuilder.inputs, inputs, e.detail.key), 100)}
                             on:OptionRemoved={(e) => debounceAndUpdate(() => removeOption(config.UrlBuilder.inputs, inputs, e.detail.key, e.detail.index), 100)}
                         />
-                    {:else if subkey === "subs"}
-                        <!-- TODO: Commenting out the below until review of no-substitution functionality is performed-->
-                        <!-- Substitutions: 
-                        <div class="info">
-                            Substitutions are utilized with text inputs. They will convert the original text (left) with the substution text (right) when used in a campaign name or URL.
-                        </div>
-                        <div class="options-listing__header">
-                            <div>Original</div>
-                            <div>Substitution</div>
-                            <div></div>
-                        </div>
-                        {#each Object.entries(inputs[key].subs) as sub}
-                            <div class="option-listing">
-                                <input value={sub[0]} on:change={(e) => debounceAndUpdate(() => handleSubsKeyUpdate(e, key, inputs[key], sub[0]))} />
-                                <input value={sub[1]} on:input={(e) => debounceAndUpdate(() => handleSubsValueUpdate(e, key, inputs[key], sub[0]))} />
-                                <button class="btn-remove__sub" on:click={(e) => debounceAndUpdate(() => removeSub(key, sub[0]))}>-</button>
-                            </div>
-                        {/each}
-                        <button class="btn-add" on:click={(e) => { addNewSub(key) }}>Add Substitution</button> -->
-                    {:else if subkey === "value"}
-                        <!-- Value is: ${inputs[key][subkey]} -->
                     {:else if subkey === "type"}
                             <Select 
                                 label="{subkey}" 

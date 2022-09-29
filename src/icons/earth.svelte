@@ -1,1 +1,12 @@
+<!--
+Copyright 2022 Adobe. All rights reserved.
+This file is licensed to you under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License. You may obtain a copy
+of the License at http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under
+the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+OF ANY KIND, either express or implied. See the License for the specific language
+governing permissions and limitations under the License.
+-->
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 42.8 42.8"><defs><clipPath id="clip-path"><rect width="42.8" height="42.8" style="fill:none"/></clipPath></defs><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><g style="clip-path:url(#clip-path)"><path d="M34.5,32.53,32.39,27a2.86,2.86,0,0,0-1.06-1.37L28.91,24a1.69,1.69,0,0,1-.7-1.66l.52-3.1a1.68,1.68,0,0,1,1.77-1.41l7.72.46A17.16,17.16,0,0,1,34.5,32.53ZM21.29,38.7a17.57,17.57,0,0,1-2.17-.14l2.22-6A3.64,3.64,0,0,0,21,29.34l-.94-1.47a3.57,3.57,0,0,0-3-1.66H14.2a2.43,2.43,0,0,1-1.8-.81l-1.15-1.28a2.4,2.4,0,0,1-.46-2.47c.48-1.29.74-1.87.87-2.13l4.44.32c1.57.11,1.82-1.18,2-2.22a3.86,3.86,0,0,1,1.76-3.06c.39-.23,1.59-.92,1.44-2s-2-1.65-2.38-1.73l-.12,0-3.38-.12A2.73,2.73,0,0,1,13.33,9.6L11.61,7.21A17,17,0,0,1,18,4.54c1.14,1.33,2.27,2,3.34,2a2.56,2.56,0,0,0,.39,0,3.73,3.73,0,0,0,2.49-2c.39.07.78.15,1.16.24l.47,5.33a3.19,3.19,0,0,0,2.82,2.89l1,.1a3.86,3.86,0,0,0,3.14-1.1l1.62-1.62A17.12,17.12,0,0,1,38,17l-7.38-.44a2.89,2.89,0,0,0-3,2.41L27,22.09a2.89,2.89,0,0,0,1.19,2.84l2.42,1.69a1.71,1.71,0,0,1,.63.82l2.32,6.07A17.17,17.17,0,0,1,21.29,38.7M4.05,21.46A17.24,17.24,0,0,1,10.66,7.91l1.7,2.38a4,4,0,0,0,3,1.63l3.32.12c.73.18,1.39.56,1.42.74s-.12.33-.85.75A4.94,4.94,0,0,0,17,17.39c-.24,1.26-.35,1.29-.76,1.27-.76-.06-4.57-.34-4.83-.34-.46,0-.63.11-1.69,2.91a3.61,3.61,0,0,0,.69,3.68l1.16,1.29a3.63,3.63,0,0,0,2.68,1.2H17a2.38,2.38,0,0,1,2,1.11L20,30a2.43,2.43,0,0,1,.23,2.13l-2.29,6.26A17.29,17.29,0,0,1,4.05,21.46M23,4.3a2.26,2.26,0,0,1-1.39,1,2.75,2.75,0,0,1-2.13-1,16.57,16.57,0,0,1,1.86-.11C21.85,4.22,22.4,4.25,23,4.3ZM33.63,9.44,32,11.1a2.65,2.65,0,0,1-2.17.76l-1-.11A2,2,0,0,1,27,9.94l-.42-4.87a17.25,17.25,0,0,1,7,4.37m5.65,8v0A18.39,18.39,0,0,0,18.11,3.32h0a18.38,18.38,0,0,0-7.59,3.23l-.05,0,0,0A18.43,18.43,0,1,0,39.28,17.49" /></g></g></g></svg>
