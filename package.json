@@ -1,7 +1,7 @@
 {
   "name": "marketo-campaign-tools",
   "productName": "Marketo Campaign Tools",
-  "version": "1.3.3",
+  "version": "1.3.4",
   "private": true,
   "main": "index.js",
   "license": "Apache-2.0",
@@ -48,7 +48,7 @@
         {
           "name": "@electron-forge/maker-zip",
           "config": {
-            "name": "marketo_reporting_framework_toolkit"
+            "name": "marketo_campaign_tools"
           },
           "platforms": [
             "darwin"
